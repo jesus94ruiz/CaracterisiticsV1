@@ -6,6 +6,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.jera.caracterisiticsv1.MainScreen
 import com.jera.caracterisiticsv1.SplashScreen
+import com.jera.caracterisiticsv1.CameraScreen
 
 @Composable
 fun AppNavigation(){
@@ -18,7 +19,10 @@ fun AppNavigation(){
             SplashScreen(navController)
         }
         composable(AppScreens.MainScreen.route){
-            MainScreen()
+            MainScreen(navController)
+        }
+        composable(AppScreens.CameraScreen.route){
+            CameraScreen(navController)
         }
     }
 }

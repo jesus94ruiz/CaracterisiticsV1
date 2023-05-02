@@ -1,33 +1,170 @@
 package com.jera.caracterisiticsv1
 
+import android.content.ActivityNotFoundException
+import android.content.Intent
+import android.provider.MediaStore
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.runtime.Composable
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material.Text
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.*
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.core.app.ActivityCompat
+import androidx.navigation.NavHostController
+import com.jera.caracterisiticsv1.ui.theme.Poppins
 
 
+//@Preview(showSystemUi = true, showBackground = true)
 @Composable
-fun MainScreen(){
+fun MainScreen(navController: NavHostController){
     Column(
-        modifier = Modifier.
-        background(Color(0x13, 0x18, 0x20,0xFF)).
-        fillMaxSize(),
+        modifier = Modifier
+            .background(Color(0x34, 0x3A, 0x40, 0xFF))
+            .fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        Text("Home")
+        Spacer(Modifier.size(30.dp))
+        ButtonGallery()
+        Spacer(Modifier.size(40.dp))
+        ButtonCamera()
+        Spacer(Modifier.size(40.dp))
+        ButtonGarage()
+    }
+    Column()
+    {
+        Header()
     }
 }
 
-/*@Preview(showSystemUi = true, showBackground = true)
 @Composable
-fun MainScreenPreview(){
-    MainScreen()
-}*/
+fun ButtonGallery() {
+    Button(onClick = {},
+        modifier = Modifier
+            .height(180.dp)
+            .width(180.dp)
+            .shadow(10.dp, shape = RectangleShape, spotColor = Color(0x00, 0x00, 0x00, 0xFF)),
+        colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xE9, 0xEC, 0xEF, 0xFF)),
+        //border = BorderStroke(3.dp, Color(0x34, 0x3A, 0x40, 0xFF)),
+        shape = RoundedCornerShape(5),
+        //Naranja 0xEE, 0x6C, 0x4D, 0xFF
+        //Azul Clarito 0xE0, 0xFB, 0xFC, 0xFF
+        //Azul Cielo 0x98, 0xC1, 0xD9, 0xFF
+        //Azul Militar 0x3D, 0x5A, 0x80, 0xFF
+        //Color(0x34, 0x3A, 0x40, 0xFF) Gris
+        //Color(0xE9, 0xEC, 0xEF, 0xFF) Blanco
+    ){
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Spacer(Modifier.size(10.dp))
+            Icon(
+                painter = painterResource(id = R.drawable.gallery),
+                contentDescription = null,
+                modifier = Modifier.size(80.dp, 80.dp),
+                tint = Color(0x34, 0x3A, 0x40, 0xFF)
+            )
+            Spacer(Modifier.size(ButtonDefaults.IconSpacing))
+            Text(text = "Galería",
+                modifier = Modifier.align(Alignment.CenterHorizontally),
+                fontSize = 26.sp ,
+                fontFamily = Poppins,
+                fontWeight = FontWeight.Normal,
+                color = Color(0x34, 0x3A, 0x40, 0xFF)
+            )
+        }
+    }
+}
+
+@Composable
+fun ButtonCamera() {
+    Button(onClick = {},
+        modifier = Modifier
+            .height(180.dp)
+            .width(180.dp)
+            .shadow(10.dp, shape = RectangleShape, spotColor = Color(0x00, 0x00, 0x00, 0xFF)),
+        colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xE9, 0xEC, 0xEF, 0xFF)),
+        shape = RoundedCornerShape(5),
+    ){
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Spacer(Modifier.size(10.dp))
+            Icon(
+                painter = painterResource(id = R.drawable.camera),
+                contentDescription = null,
+                modifier = Modifier.size(80.dp, 80.dp),
+                tint = Color(0x34, 0x3A, 0x40, 0xFF)
+            )
+            Spacer(Modifier.size(ButtonDefaults.IconSpacing))
+            Text(text = "Cámara",
+                modifier = Modifier.align(Alignment.CenterHorizontally),
+                fontSize = 26.sp ,
+                fontFamily = Poppins,
+                fontWeight = FontWeight.Normal,
+                color = Color(0x34, 0x3A, 0x40, 0xFF)
+            )
+        }
+    }
+}
+
+@Composable
+fun ButtonGarage() {
+    Button(onClick = {},
+        modifier = Modifier
+            .height(180.dp)
+            .width(180.dp)
+            .shadow(10.dp, shape = RectangleShape, spotColor = Color(0x00, 0x00, 0x00, 0xFF)),
+        colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xE9, 0xEC, 0xEF, 0xFF)),
+        shape = RoundedCornerShape(5),
+    ){
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Spacer(Modifier.size(10.dp))
+            Icon(
+                painter = painterResource(id = R.drawable.car_in_garage),
+                contentDescription = null,
+                modifier = Modifier.size(80.dp, 80.dp),
+                tint = Color(0x34, 0x3A, 0x40, 0xFF)
+            )
+            Spacer(Modifier.size(ButtonDefaults.IconSpacing))
+            Text(text = "Garaje",
+                modifier = Modifier.align(Alignment.CenterHorizontally),
+                fontSize = 26.sp ,
+                fontFamily = Poppins,
+                fontWeight = FontWeight.Normal,
+                color = Color(0x34, 0x3A, 0x40, 0xFF)
+            )
+        }
+    }
+}
+@Composable
+fun Header(){
+    TopAppBar(
+        backgroundColor = Color(0xE9, 0xEC, 0xEF, 0xFF),
+        elevation = 40.dp
+    ) {
+        Text(text = "Caracteristics",
+            Modifier.padding(5.dp, 5.dp),
+            fontSize = 28.sp,
+            fontFamily = Poppins,
+            fontWeight = FontWeight.Bold,
+            color = Color(0x34, 0x3A, 0x40, 0xFF)
+        )
+    }
+}
+
 
