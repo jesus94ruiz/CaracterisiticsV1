@@ -1,5 +1,6 @@
 package com.jera.caracterisiticsv1
 
+import android.app.LauncherActivity
 import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.provider.MediaStore
@@ -13,13 +14,16 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
+import androidx.compose.runtime.currentCompositionLocalContext
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.app.ActivityCompat
 import androidx.navigation.NavHostController
+import com.jera.caracterisiticsv1.navigation.AppScreens
 import com.jera.caracterisiticsv1.ui.theme.Poppins
 
 
@@ -33,10 +37,10 @@ fun MainScreen(navController: NavHostController){
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        Spacer(Modifier.size(30.dp))
-        ButtonGallery()
         Spacer(Modifier.size(40.dp))
-        ButtonCamera()
+        ButtonCamera(navController)
+        Spacer(Modifier.size(30.dp))
+        ButtonGallery(navController)
         Spacer(Modifier.size(40.dp))
         ButtonGarage()
     }
@@ -47,7 +51,7 @@ fun MainScreen(navController: NavHostController){
 }
 
 @Composable
-fun ButtonGallery() {
+fun ButtonGallery(navController: NavHostController) {
     Button(onClick = {},
         modifier = Modifier
             .height(180.dp)
@@ -87,8 +91,12 @@ fun ButtonGallery() {
 }
 
 @Composable
-fun ButtonCamera() {
-    Button(onClick = {},
+fun ButtonCamera(navController: NavHostController) {
+    val context = LocalContext.current
+    Button(onClick = {
+            //navController.navigate(AppScreens.CameraActivity.route)
+            val cameraIntent = Intent(context, CameraActivity::class.java)
+            context.startActivity(cameraIntent)},
         modifier = Modifier
             .height(180.dp)
             .width(180.dp)
@@ -166,5 +174,4 @@ fun Header(){
         )
     }
 }
-
 
