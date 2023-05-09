@@ -4,6 +4,7 @@ import android.app.LauncherActivity
 import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.provider.MediaStore
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -37,11 +38,11 @@ fun MainScreen(navController: NavHostController){
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        Spacer(Modifier.size(40.dp))
+        Spacer(Modifier.size(50.dp))
         ButtonCamera(navController)
         Spacer(Modifier.size(30.dp))
         ButtonGallery(navController)
-        Spacer(Modifier.size(40.dp))
+        Spacer(Modifier.size(30.dp))
         ButtonGarage()
     }
     Column()
@@ -52,7 +53,11 @@ fun MainScreen(navController: NavHostController){
 
 @Composable
 fun ButtonGallery(navController: NavHostController) {
-    Button(onClick = {},
+    val context = LocalContext.current
+    Button(onClick = {
+        val galleryIntent = Intent(context, GalleryActivity::class.java)
+        context.startActivity(galleryIntent)
+    },
         modifier = Modifier
             .height(180.dp)
             .width(180.dp)
@@ -66,6 +71,7 @@ fun ButtonGallery(navController: NavHostController) {
         //Azul Militar 0x3D, 0x5A, 0x80, 0xFF
         //Color(0x34, 0x3A, 0x40, 0xFF) Gris
         //Color(0xE9, 0xEC, 0xEF, 0xFF) Blanco
+        //Color(0xC3, 0xFD, 0xEB, 0xFF) Azul Icono
     ){
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,

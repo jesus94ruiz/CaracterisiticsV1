@@ -50,7 +50,7 @@ fun Splash() {
         contentAlignment = Alignment.Center
     )
     {
-        Image(painter = painterResource(id = R.drawable.splashscreentexture), contentDescription = "Logo")
+        Image(painter = painterResource(id = R.drawable.splashscreen), contentDescription = "Logo")
         Image(painter = painterResource(id = R.drawable.splashscreenrueda) , contentDescription = "LogoRueda",
             Modifier.graphicsLayer{
                 this.rotationZ = angle })

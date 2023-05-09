@@ -7,6 +7,7 @@ import android.graphics.Bitmap
 import android.os.Bundle
 import android.provider.MediaStore
 import android.util.Log
+import android.widget.ImageView
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.result.contract.ActivityResultContracts
@@ -25,7 +26,7 @@ class CameraActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.camera_screen)
-        Log.d("MyApp", "Hello, world! ONCREATE")
+        Log.d("CameraActivity", "Hello, world! ONCREATE")
 
             if (ContextCompat.checkSelfPermission
                     (
@@ -69,7 +70,7 @@ class CameraActivity : ComponentActivity() {
         super.onActivityResult(requestCode, resultCode, data)
         if(resultCode == Activity.RESULT_OK){
             if (requestCode == CAMERA_REQUEST_CODE){
-                val ivImage = findViewById<androidx.appcompat.widget.AppCompatImageView>(R.id.iv_image)
+                val ivImage = findViewById<ImageView>(R.id.iv_image)
                 val thumbNail: Bitmap = data!!.extras!!.get("data") as Bitmap
                 ivImage.setImageBitmap(thumbNail)
             }
