@@ -63,15 +63,7 @@ fun ButtonGallery(navController: NavHostController) {
             .width(180.dp)
             .shadow(10.dp, shape = RectangleShape, spotColor = Color(0x00, 0x00, 0x00, 0xFF)),
         colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xE9, 0xEC, 0xEF, 0xFF)),
-        //border = BorderStroke(3.dp, Color(0x34, 0x3A, 0x40, 0xFF)),
         shape = RoundedCornerShape(5),
-        //Naranja 0xEE, 0x6C, 0x4D, 0xFF
-        //Azul Clarito 0xE0, 0xFB, 0xFC, 0xFF
-        //Azul Cielo 0x98, 0xC1, 0xD9, 0xFF
-        //Azul Militar 0x3D, 0x5A, 0x80, 0xFF
-        //Color(0x34, 0x3A, 0x40, 0xFF) Gris
-        //Color(0xE9, 0xEC, 0xEF, 0xFF) Blanco
-        //Color(0xC3, 0xFD, 0xEB, 0xFF) Azul Icono
     ){
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -100,9 +92,9 @@ fun ButtonGallery(navController: NavHostController) {
 fun ButtonCamera(navController: NavHostController) {
     val context = LocalContext.current
     Button(onClick = {
-            //navController.navigate(AppScreens.CameraActivity.route)
-            val cameraIntent = Intent(context, CameraActivity::class.java)
-            context.startActivity(cameraIntent)},
+            navController.navigate(AppScreens.CameraScreen.route)},
+    /*      val cameraIntent = Intent(context, CameraActivity::class.java)
+            context.startActivity(cameraIntent)},*/
         modifier = Modifier
             .height(180.dp)
             .width(180.dp)
