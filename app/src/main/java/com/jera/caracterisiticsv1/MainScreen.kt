@@ -47,7 +47,7 @@ fun MainScreen(navController: NavHostController){
     }
     Column()
     {
-        Header()
+        Header(navController)
     }
 }
 
@@ -90,11 +90,8 @@ fun ButtonGallery(navController: NavHostController) {
 
 @Composable
 fun ButtonCamera(navController: NavHostController) {
-    val context = LocalContext.current
     Button(onClick = {
-            navController.navigate(AppScreens.CameraScreen.route)},
-    /*      val cameraIntent = Intent(context, CameraActivity::class.java)
-            context.startActivity(cameraIntent)},*/
+        navController.navigate(AppScreens.CameraScreen.route)},
         modifier = Modifier
             .height(180.dp)
             .width(180.dp)
@@ -158,18 +155,29 @@ fun ButtonGarage() {
     }
 }
 @Composable
-fun Header(){
+fun Header(navController: NavHostController){
     TopAppBar(
         backgroundColor = Color(0xE9, 0xEC, 0xEF, 0xFF),
-        elevation = 40.dp
-    ) {
-        Text(text = "Caracteristics",
-            Modifier.padding(5.dp, 5.dp),
-            fontSize = 28.sp,
-            fontFamily = Poppins,
-            fontWeight = FontWeight.Bold,
-            color = Color(0x34, 0x3A, 0x40, 0xFF)
-        )
-    }
+        elevation = 40.dp,
+        title = {
+            Text(text = "Caracteristics",
+                Modifier.padding(5.dp, 5.dp),
+                fontSize = 28.sp,
+                fontFamily = Poppins,
+                fontWeight = FontWeight.Bold,
+                color = Color(0x34, 0x3A, 0x40, 0xFF)
+            )
+        },
+        actions = {
+            IconButton(onClick = { navController.navigate(AppScreens.SettingsScreen.route) }) {
+                Icon(
+                    painter = painterResource(id = R.drawable.settings),
+                    contentDescription = "Open settings",
+                    modifier = Modifier.size(30.dp, 30.dp),
+                    tint = Color(0x34, 0x3A, 0x40, 0xFF)
+                )
+            }
+        },
+    )
 }
 
