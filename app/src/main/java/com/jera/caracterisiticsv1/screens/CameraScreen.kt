@@ -1,4 +1,4 @@
-package com.jera.caracterisiticsv1
+package com.jera.caracterisiticsv1.screens
 
 import android.content.Context
 import android.view.ViewGroup
@@ -29,6 +29,8 @@ import com.google.accompanist.permissions.PermissionState
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
 import com.jera.caracterisiticsv1.ui.theme.Poppins
+import com.jera.caracterisiticsv1.R
+import com.jera.caracterisiticsv1.navigation.AppScreens
 import java.io.File
 import java.util.concurrent.Executor
 
@@ -85,7 +87,7 @@ private fun cameraContent(
         FloatingActionButton(
             onClick = {
                 val executor = ContextCompat.getMainExecutor(localContext)
-                takePicture(cameraController, executor)
+                takePicture(cameraController, executor, navController)
             },
             modifier = Modifier
                 .height(70.dp)
@@ -123,19 +125,21 @@ private fun cameraContent(
     }
 }
 
-private fun takePicture(cameraController: LifecycleCameraController, executor: Executor) {
+private fun takePicture(cameraController: LifecycleCameraController, executor: Executor, navController: NavHostController) {
     val file = File.createTempFile("imagentest", ".jpg")
     val outputDirectory = ImageCapture.OutputFileOptions.Builder(file).build()
+
     cameraController.takePicture(
         outputDirectory,
         executor,
         object : ImageCapture.OnImageSavedCallback {
             override fun onImageSaved(outputFileResults: ImageCapture.OutputFileResults) {
-                println(outputFileResults.savedUri)
+                println(outputFileResults.savedUri.toString())
+                navController.navigate(AppScreens.AnalysingScreen.route + "/" + file.name)
             }
 
             override fun onError(exception: ImageCaptureException) {
-                println()
+                println("Error al guardar la imagen: ${exception.message}")
             }
         },
     )

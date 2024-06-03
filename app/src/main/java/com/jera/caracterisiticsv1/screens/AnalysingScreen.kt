@@ -1,40 +1,48 @@
-package com.jera.caracterisiticsv1
+package com.jera.caracterisiticsv1.screens
 
-import android.window.SplashScreen
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.jera.caracterisiticsv1.navigation.AppScreens
+import com.jera.caracterisiticsv1.R
+import com.jera.caracterisiticsv1.ui.theme.Poppins
 import kotlinx.coroutines.delay
+import java.net.URI
+import java.io.File
+import javax.inject.Inject
 
 
 @Composable
-fun SplashScreen(navController: NavHostController){
+fun AnalysingScreen(navController: NavHostController, fileUri:String){
+    println("Analyse")
+    val file: File = File(URI(completePathCamera(fileUri)))
     LaunchedEffect(key1 = true){
-        delay( 1000)
+        delay( 3000)
         navController.popBackStack()
         navController.navigate(AppScreens.MainScreen.route)
     }
-    Splash()
+    Analysing()
 }
 
+@Preview
 @Composable
-fun Splash() {
+fun Analysing() {
     val infiniteTransition = rememberInfiniteTransition()
     val angle by infiniteTransition.animateFloat(
         initialValue = 0F,
@@ -50,9 +58,22 @@ fun Splash() {
         contentAlignment = Alignment.Center
     )
     {
-        Image(painter = painterResource(id = R.drawable.splashscreen), contentDescription = "Logo")
+        Text(
+            text = "Analizando...",
+            color = Color(0xE9, 0xEC, 0xEF, 0xFF),
+            fontSize = 26.sp ,
+            fontFamily = Poppins,
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(bottom = 64.dp)
+
+        )
         Image(painter = painterResource(id = R.drawable.splashscreenrueda) , contentDescription = "LogoRueda",
             Modifier.graphicsLayer{
                 this.rotationZ = angle })
     }
+}
+
+fun completePathCamera(fileName: String) : String{
+    return "file:///data/user/0/com.jera.caracterisiticsv1/cache/$fileName"
 }

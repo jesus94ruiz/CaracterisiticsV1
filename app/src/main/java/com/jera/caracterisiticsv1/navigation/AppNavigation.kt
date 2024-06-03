@@ -1,13 +1,17 @@
 package com.jera.caracterisiticsv1.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.navigation.NamedNavArgument
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.jera.caracterisiticsv1.MainScreen
-import com.jera.caracterisiticsv1.SplashScreen
-import com.jera.caracterisiticsv1.CameraScreen
-import com.jera.caracterisiticsv1.SettingsScreen
+import com.jera.caracterisiticsv1.*
+import com.jera.caracterisiticsv1.screens.SplashScreen
+import com.jera.caracterisiticsv1.screens.MainScreen
+import com.jera.caracterisiticsv1.screens.CameraScreen
+import com.jera.caracterisiticsv1.screens.SettingsScreen
+import com.jera.caracterisiticsv1.screens.AnalysingScreen
+
 
 @Composable
 fun AppNavigation(){
@@ -27,6 +31,11 @@ fun AppNavigation(){
         }
         composable(AppScreens.SettingsScreen.route){
              SettingsScreen(navController)
+        }
+        composable(AppScreens.AnalysingScreen.route + "/{fileURI}"){ backStackEntry ->
+            val fileURInav: String = backStackEntry.arguments?.getString("fileURI") ?: ""
+            println(fileURInav.toString())
+            AnalysingScreen(navController, fileUri = fileURInav)
         }
     }
 }

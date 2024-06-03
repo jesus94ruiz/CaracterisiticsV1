@@ -1,4 +1,4 @@
-package com.jera.caracterisiticsv1
+package com.jera.caracterisiticsv1.screens
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -14,6 +14,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.navigation.NavController
+import com.jera.caracterisiticsv1.R
 
 @Composable
 fun SettingsScreen(navController: NavController) {

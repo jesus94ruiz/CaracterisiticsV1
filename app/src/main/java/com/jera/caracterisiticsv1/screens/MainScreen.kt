@@ -1,4 +1,4 @@
-package com.jera.caracterisiticsv1
+package com.jera.caracterisiticsv1.screens
 
 import android.app.LauncherActivity
 import android.content.ActivityNotFoundException
@@ -26,6 +26,7 @@ import androidx.core.app.ActivityCompat
 import androidx.navigation.NavHostController
 import com.jera.caracterisiticsv1.navigation.AppScreens
 import com.jera.caracterisiticsv1.ui.theme.Poppins
+import com.jera.caracterisiticsv1.R
 
 
 //@Preview(showSystemUi = true, showBackground = true)
@@ -38,6 +39,7 @@ fun MainScreen(navController: NavHostController){
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
+        Header(navController)
         Spacer(Modifier.size(50.dp))
         ButtonCamera(navController)
         Spacer(Modifier.size(30.dp))
@@ -45,18 +47,14 @@ fun MainScreen(navController: NavHostController){
         Spacer(Modifier.size(30.dp))
         ButtonGarage()
     }
-    Column()
-    {
-        Header(navController)
-    }
 }
 
 @Composable
 fun ButtonGallery(navController: NavHostController) {
     val context = LocalContext.current
     Button(onClick = {
-        val galleryIntent = Intent(context, GalleryActivity::class.java)
-        context.startActivity(galleryIntent)
+/*        val galleryIntent = Intent(context, GalleryActivity::class.java)
+        context.startActivity(galleryIntent)*/
     },
         modifier = Modifier
             .height(180.dp)
