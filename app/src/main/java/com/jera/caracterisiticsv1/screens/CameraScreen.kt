@@ -31,13 +31,14 @@ import com.google.accompanist.permissions.rememberPermissionState
 import com.jera.caracterisiticsv1.ui.theme.Poppins
 import com.jera.caracterisiticsv1.R
 import com.jera.caracterisiticsv1.navigation.AppScreens
+import com.jera.caracterisiticsv1.viewmodels.CameraViewModel
 import java.io.File
 import java.util.concurrent.Executor
+import androidx.hilt.navigation.compose.hiltViewModel
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
-fun CameraScreen(navController: NavHostController) {
-
+fun CameraScreen(navController: NavHostController, cameraViewModel: CameraViewModel = hiltViewModel()) {
 
     // Permission
     val cameraPermissionState: PermissionState = rememberPermissionState(android.Manifest.permission.CAMERA)
@@ -49,11 +50,8 @@ fun CameraScreen(navController: NavHostController) {
     val cameraController = remember { LifecycleCameraController(context) }
     val lifecycle = LocalLifecycleOwner.current
 
-
-    println("CameraScreen Access")
-
     if(hasCameraPermission){
-        cameraContent(cameraController, lifecycle, context, navController)
+        cameraContent(cameraController, lifecycle, context, navController, cameraViewModel)
         println("hasCameraPermission")
     } else{
         requestPermission(requestPermissionState)
@@ -67,6 +65,7 @@ private fun cameraContent(
     lifecycle: LifecycleOwner,
     localContext: Context,
     navController: NavHostController,
+    cameraViewModel: CameraViewModel
 ) {
 
     cameraController.bindToLifecycle(lifecycle)
@@ -87,7 +86,7 @@ private fun cameraContent(
         FloatingActionButton(
             onClick = {
                 val executor = ContextCompat.getMainExecutor(localContext)
-                takePicture(cameraController, executor, navController)
+                cameraViewModel.takePicture(cameraController, executor, navController)
             },
             modifier = Modifier
                 .height(70.dp)

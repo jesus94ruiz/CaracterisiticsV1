@@ -7,8 +7,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.ui.Modifier
-import com.jera.caracterisiticsv1.data.RetrofitClient
-import com.jera.caracterisiticsv1.data.RetrofitService
 import com.jera.caracterisiticsv1.navigation.AppNavigation
 import com.jera.caracterisiticsv1.ui.theme.CaracterisiticsV1Theme
 import dagger.hilt.android.AndroidEntryPoint
