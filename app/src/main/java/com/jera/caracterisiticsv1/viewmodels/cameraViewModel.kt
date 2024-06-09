@@ -3,9 +3,7 @@ package com.jera.caracterisiticsv1.viewmodels
 import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCaptureException
 import androidx.camera.view.LifecycleCameraController
-import androidx.compose.runtime.remember
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.runtime.collectAsState
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavHostController
@@ -35,6 +33,8 @@ class CameraViewModel @Inject constructor(
             cameraRepository.getModel(image)
                 .collectLatest {
                     cameraResponse -> _model.value = cameraResponse
+                    println("---------------Responseeee-------------")
+                    println(cameraResponse)
                 }
         }
     }
@@ -49,7 +49,7 @@ class CameraViewModel @Inject constructor(
             object : ImageCapture.OnImageSavedCallback {
                 override fun onImageSaved(outputFileResults: ImageCapture.OutputFileResults) {
                     println(outputFileResults.savedUri.toString())
-                    navController.navigate(AppScreens.AnalysingScreen.route + "/" + file.name)
+                    getModel(file)
                 }
 
                 override fun onError(exception: ImageCaptureException) {

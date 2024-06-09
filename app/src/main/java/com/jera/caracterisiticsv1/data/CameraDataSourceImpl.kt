@@ -12,7 +12,7 @@ class CameraDataSourceImpl @Inject constructor( private val apiService: Retrofit
 
     override suspend fun getModel(image: File): Response<ApiResponse> {
 
-        val imageRequestBody = image.asRequestBody("image/jpeg".toMediaTypeOrNull())
+        val imageRequestBody = image.asRequestBody("application/octet-stream".toMediaTypeOrNull())
         val imageMultipart = MultipartBody.Part.createFormData("ImageToAnalise", image.name, imageRequestBody)
         val features = arrayOf("mmg", "color", "angle");
 

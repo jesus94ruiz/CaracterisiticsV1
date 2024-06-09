@@ -17,7 +17,7 @@ object AppModule {
     @Provides
     fun provideRetrofit(): Retrofit {
         return Retrofit.Builder()
-            .baseUrl("https://api.carnet.ai/v2/mmg/")
+            .baseUrl("https://api.carnet.ai/")
             .addConverterFactory(GsonConverterFactory.create())
             .build()
     }

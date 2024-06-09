@@ -30,8 +30,6 @@ import javax.inject.Inject
 
 @Composable
 fun AnalysingScreen(navController: NavHostController, fileUri:String){
-    println("Analyse")
-    val file: File = File(URI(completePathCamera(fileUri)))
     LaunchedEffect(key1 = true){
         delay( 3000)
         navController.popBackStack()
@@ -72,8 +70,4 @@ fun Analysing() {
             Modifier.graphicsLayer{
                 this.rotationZ = angle })
     }
-}
-
-fun completePathCamera(fileName: String) : String{
-    return "file:///data/user/0/com.jera.caracterisiticsv1/cache/$fileName"
 }

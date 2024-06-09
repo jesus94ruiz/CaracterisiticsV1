@@ -17,6 +17,7 @@ class CameraRepository @Inject constructor( private val cameraDataSource: Camera
             emit(ResourceState.Loading())
 
             val response = cameraDataSource.getModel(image)
+            println(response)
 
             if(response.isSuccessful && response.body() != null){
                 emit(ResourceState.Success(response.body()!!))

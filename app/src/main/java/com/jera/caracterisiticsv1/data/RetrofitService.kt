@@ -12,10 +12,10 @@ import retrofit2.http.Query
 interface RetrofitService {
 
     @Headers(
-        "api-key: '7a8b75f5-5c1b-4811-a6fa-f49284da7dcd"
+        "api-key: 7a8b75f5-5c1b-4811-a6fa-f49284da7dcd"
     )
     @Multipart
-    @POST("/detect")
+    @POST("v2/mmg/detect")
     suspend fun getModel(
         @Query("box_offset") box_offset: Int,
         @Query("box_min_width") box_min_width: Int,
