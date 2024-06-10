@@ -39,4 +39,5 @@ object AppModule {
     fun providesCameraRepository(cameraDataSource: CameraDataSource): CameraRepository{
         return CameraRepository(cameraDataSource)
     }
+
 }

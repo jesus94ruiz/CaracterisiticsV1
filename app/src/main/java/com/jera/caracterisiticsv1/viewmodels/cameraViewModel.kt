@@ -8,6 +8,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavHostController
 import com.jera.caracterisiticsv1.data.ApiResponse.ApiResponse
+import com.jera.caracterisiticsv1.data.GoogleApiResponse.GoogleApiResponse
 import com.jera.caracterisiticsv1.navigation.AppScreens
 import com.jera.caracterisiticsv1.repository.CameraRepository
 import com.jera.caracterisiticsv1.utilities.ResourceState
@@ -28,6 +29,9 @@ class CameraViewModel @Inject constructor(
 
     private val _model: MutableStateFlow<ResourceState<ApiResponse>> = MutableStateFlow(ResourceState.Loading())
     val model: StateFlow<ResourceState<ApiResponse>> = _model
+
+    private val _modelPictures: MutableStateFlow<ResourceState<GoogleApiResponse>> = MutableStateFlow(ResourceState.Loading())
+    val modelPictures: StateFlow<ResourceState<GoogleApiResponse>> = _modelPictures
     fun getModel(image: File){
         viewModelScope.launch (Dispatchers.IO) {
             cameraRepository.getModel(image)
@@ -49,7 +53,9 @@ class CameraViewModel @Inject constructor(
             object : ImageCapture.OnImageSavedCallback {
                 override fun onImageSaved(outputFileResults: ImageCapture.OutputFileResults) {
                     println(outputFileResults.savedUri.toString())
+                    navController.navigate(AppScreens.AnalysingScreen.route)
                     getModel(file)
+                    getModelPictures("lamborghini Gallardo")
                 }
 
                 override fun onError(exception: ImageCaptureException) {
@@ -57,6 +63,18 @@ class CameraViewModel @Inject constructor(
                 }
             },
         )
+    }
+
+    fun getModelPictures(query:String){
+        println("--------GETMODELPICTURES-----------")
+        viewModelScope.launch (Dispatchers.IO) {
+            cameraRepository.getModelPictures(query)
+                .collectLatest {
+                        cameraResponse -> _modelPictures.value = cameraResponse
+                    println("---------------GoogleResponseeee-------------")
+                    println(cameraResponse)
+                }
+        }
     }
 
 }

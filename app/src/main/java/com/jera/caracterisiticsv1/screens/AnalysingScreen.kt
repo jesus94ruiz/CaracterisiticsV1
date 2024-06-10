@@ -29,7 +29,7 @@ import javax.inject.Inject
 
 
 @Composable
-fun AnalysingScreen(navController: NavHostController, fileUri:String){
+fun AnalysingScreen(navController: NavHostController){
     LaunchedEffect(key1 = true){
         delay( 3000)
         navController.popBackStack()

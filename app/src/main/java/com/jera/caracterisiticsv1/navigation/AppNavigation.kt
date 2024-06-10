@@ -32,10 +32,8 @@ fun AppNavigation(){
         composable(AppScreens.SettingsScreen.route){
              SettingsScreen(navController)
         }
-        composable(AppScreens.AnalysingScreen.route + "/{fileURI}"){ backStackEntry ->
-            val fileURInav: String = backStackEntry.arguments?.getString("fileURI") ?: ""
-            println(fileURInav.toString())
-            AnalysingScreen(navController, fileUri = fileURInav)
+        composable(AppScreens.AnalysingScreen.route){
+            AnalysingScreen(navController)
         }
     }
 }
