@@ -1,6 +1,7 @@
 package com.jera.caracterisiticsv1.screens
 
 import android.content.Context
+import android.util.Log
 import android.view.ViewGroup
 import androidx.camera.view.LifecycleCameraController
 import androidx.camera.view.PreviewView
@@ -10,6 +11,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -33,6 +35,7 @@ import com.jera.caracterisiticsv1.viewmodels.CameraViewModel
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.jera.caracterisiticsv1.data.ApiResponse.ApiResponse
 import com.jera.caracterisiticsv1.navigation.AppScreens
+import com.jera.caracterisiticsv1.ui.components.Analysing
 import com.jera.caracterisiticsv1.utilities.ResourceState
 
 @OptIn(ExperimentalPermissionsApi::class)

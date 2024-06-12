@@ -10,7 +10,7 @@ import com.jera.caracterisiticsv1.screens.SplashScreen
 import com.jera.caracterisiticsv1.screens.MainScreen
 import com.jera.caracterisiticsv1.screens.CameraScreen
 import com.jera.caracterisiticsv1.screens.SettingsScreen
-import com.jera.caracterisiticsv1.screens.AnalysingScreen
+import com.jera.caracterisiticsv1.screens.ResultsScreen
 
 
 @Composable
@@ -32,8 +32,8 @@ fun AppNavigation(){
         composable(AppScreens.SettingsScreen.route){
              SettingsScreen(navController)
         }
-        composable(AppScreens.AnalysingScreen.route){
-            AnalysingScreen(navController)
+        composable(AppScreens.ResultsScreen.route){
+            ResultsScreen(navController)
         }
     }
 }
