@@ -6,11 +6,9 @@ import androidx.camera.core.ImageCaptureException
 import androidx.camera.view.LifecycleCameraController
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.navigation.NavHostController
 import com.jera.caracterisiticsv1.data.ApiResponse.ApiResponse
 import com.jera.caracterisiticsv1.data.ApiResponse.Detection
 import com.jera.caracterisiticsv1.data.GoogleApiResponse.GoogleApiResponse
-import com.jera.caracterisiticsv1.navigation.AppScreens
 import com.jera.caracterisiticsv1.repository.CameraRepository
 import com.jera.caracterisiticsv1.utilities.ResourceState
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -28,31 +26,30 @@ class CameraViewModel @Inject constructor(
     private val cameraRepository: CameraRepository
 ) : ViewModel(){
 
-    private val _model: MutableStateFlow<ResourceState<ApiResponse>> = MutableStateFlow(ResourceState.Loading())
-    val model: StateFlow<ResourceState<ApiResponse>> = _model
+    var _model: MutableStateFlow<ResourceState<ApiResponse>> = MutableStateFlow(ResourceState.Loading())
+    var model: StateFlow<ResourceState<ApiResponse>> = _model
 
-    private val _modelPictures: MutableStateFlow<ResourceState<GoogleApiResponse>> = MutableStateFlow(ResourceState.Loading())
-    val modelPictures: StateFlow<ResourceState<GoogleApiResponse>> = _modelPictures
+    var _modelPictures: MutableStateFlow<ResourceState<GoogleApiResponse>> = MutableStateFlow(ResourceState.Loading())
+    var modelPictures: MutableStateFlow<ResourceState<GoogleApiResponse>> = _modelPictures
 
-    private var _detections: List<Detection> = emptyList()
-    var detections: List<Detection> = _detections
+    var detections: List<Detection> = emptyList()
 
     fun getModel(image: File){
         viewModelScope.launch (Dispatchers.IO) {
             cameraRepository.getModel(image)
                 .collectLatest {
-                    cameraResponse -> _model.value = cameraResponse;
+                    cameraResponse -> _model.value = cameraResponse
                     if (cameraResponse is ResourceState.Success) {
                         println(cameraResponse)
-                        _model.value = cameraResponse
-                        _detections = cameraResponse.data.detections
-
+                        detections = cameraResponse.data.detections
+                        if(detections.isNotEmpty())
+                            detections.forEach{ detection -> detection.mmg.forEach{ mmg ->  getModelPictures(mmg.make_name + " " + mmg.model_name + " " + mmg.years) } }
                     }
                 }
         }
     }
 
-    fun takePicture(cameraController: LifecycleCameraController, executor: Executor, navController: NavHostController) {
+    fun takePicture(cameraController: LifecycleCameraController, executor: Executor) {
         val file = File.createTempFile("imagentest", ".jpg")
         val outputDirectory = ImageCapture.OutputFileOptions.Builder(file).build()
 
@@ -61,11 +58,9 @@ class CameraViewModel @Inject constructor(
             executor,
             object : ImageCapture.OnImageSavedCallback {
                 override fun onImageSaved(outputFileResults: ImageCapture.OutputFileResults) {
-                    navController.navigate(AppScreens.ResultsScreen.route)
                     println(outputFileResults.savedUri.toString())
                     getModel(file)
                 }
-
                 override fun onError(exception: ImageCaptureException) {
                     println("Error al guardar la imagen: ${exception.message}")
                 }
@@ -88,17 +83,4 @@ class CameraViewModel @Inject constructor(
                 }
         }
     }
-
 }
-
-/*
-if (cameraResponse is ResourceState.Success) {
-    val responseData = cameraResponse.data
-    detections = responseData.detections
-    _detections2.value = cameraResponse
-    if(detections.isNotEmpty()){
-        getModelPictures(detections[0].mmg[0].make_name + " " + detections[0].mmg[0].model_name + " " + detections[0].mmg[0].years)
-    }
-} else if (cameraResponse is ResourceState.Error) {
-    Log.e("CameraViewModel", "Error: ${cameraResponse.error}")
-}*/

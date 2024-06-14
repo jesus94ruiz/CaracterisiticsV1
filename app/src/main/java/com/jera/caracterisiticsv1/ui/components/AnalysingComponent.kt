@@ -18,8 +18,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.jera.caracterisiticsv1.R
 import com.jera.caracterisiticsv1.ui.theme.Poppins
-
-
 @Composable
 fun Analysing() {
     val infiniteTransition = rememberInfiniteTransition()

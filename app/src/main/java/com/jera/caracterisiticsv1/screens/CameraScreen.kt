@@ -1,7 +1,6 @@
 package com.jera.caracterisiticsv1.screens
 
 import android.content.Context
-import android.util.Log
 import android.view.ViewGroup
 import androidx.camera.view.LifecycleCameraController
 import androidx.camera.view.PreviewView
@@ -11,7 +10,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -33,10 +31,9 @@ import com.jera.caracterisiticsv1.ui.theme.Poppins
 import com.jera.caracterisiticsv1.R
 import com.jera.caracterisiticsv1.viewmodels.CameraViewModel
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.jera.caracterisiticsv1.data.ApiResponse.ApiResponse
-import com.jera.caracterisiticsv1.navigation.AppScreens
 import com.jera.caracterisiticsv1.ui.components.Analysing
 import com.jera.caracterisiticsv1.utilities.ResourceState
+import androidx.compose.runtime.getValue
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
@@ -52,13 +49,29 @@ fun CameraScreen(navController: NavHostController, cameraViewModel: CameraViewMo
     val cameraController = remember { LifecycleCameraController(context) }
     val lifecycle = LocalLifecycleOwner.current
 
+    val apiResponse by cameraViewModel.model.collectAsState(ResourceState.NotInitialized())
+
     if(hasCameraPermission){
-        cameraContent(cameraController, lifecycle, context, navController, cameraViewModel)
         println("hasCameraPermission")
+        when(apiResponse){
+            is ResourceState.NotInitialized ->{
+                cameraContent(cameraController, lifecycle, context, navController, cameraViewModel)
+            }
+            is ResourceState.Loading ->{
+                Analysing()
+            }
+            is ResourceState.Success ->{
+                ResultsScreen(navController = navController)
+            }
+            is ResourceState.Error ->{
+                println("Error")
+            }
+        }
     } else{
         requestPermission(requestPermissionState)
         println("NOhasCameraPermission")
     }
+
 }
 
 @Composable
@@ -88,7 +101,7 @@ private fun cameraContent(
         FloatingActionButton(
             onClick = {
                 val executor = ContextCompat.getMainExecutor(localContext)
-                cameraViewModel.takePicture(cameraController, executor, navController)
+                cameraViewModel.takePicture(cameraController, executor)
             },
             modifier = Modifier
                 .height(70.dp)
