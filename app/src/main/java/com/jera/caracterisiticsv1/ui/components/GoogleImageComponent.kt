@@ -15,6 +15,7 @@ import coil.compose.rememberAsyncImagePainter
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.tooling.preview.Preview
+import coil.compose.AsyncImage
 
 @Composable
 fun GoogleImageComponent(imageUrls: List<String>) {

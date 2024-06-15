@@ -1,5 +1,7 @@
 package com.jera.caracterisiticsv1.viewmodels
 
+import android.content.Context
+import android.net.Uri
 import android.util.Log
 import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCaptureException
@@ -8,7 +10,12 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.jera.caracterisiticsv1.data.ApiResponse.ApiResponse
 import com.jera.caracterisiticsv1.data.ApiResponse.Detection
+import com.jera.caracterisiticsv1.data.ApiResponse.Meta
+import com.jera.caracterisiticsv1.data.ApiResponse.Parameters
 import com.jera.caracterisiticsv1.data.GoogleApiResponse.GoogleApiResponse
+import com.jera.caracterisiticsv1.data.GoogleApiResponse.Queries
+import com.jera.caracterisiticsv1.data.GoogleApiResponse.SearchInformation
+import com.jera.caracterisiticsv1.data.GoogleApiResponse.Url
 import com.jera.caracterisiticsv1.data.modelDetected.ModelDetected
 import com.jera.caracterisiticsv1.repository.CameraRepository
 import com.jera.caracterisiticsv1.utilities.ResourceState
@@ -19,6 +26,10 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import java.io.File
+import java.io.FileOutputStream
+import java.io.InputStream
+import java.io.OutputStream
+import java.util.*
 import java.util.concurrent.Executor
 import javax.inject.Inject
 
@@ -41,8 +52,9 @@ class CameraViewModel @Inject constructor(
     val modelsDetected: StateFlow<ResourceState<MutableList<ModelDetected>>> = _modelsDetected
     val models: MutableList<ModelDetected> = mutableListOf()
 
+
     fun getModel(image: File) {
-        viewModelScope.launch(Dispatchers.IO) {
+     viewModelScope.launch(Dispatchers.IO) {
             cameraRepository.getModel(image)
                 .collectLatest { cameraResponse ->
                     _model.value = cameraResponse
@@ -135,9 +147,83 @@ class CameraViewModel @Inject constructor(
         println("------------------------------")
     }
 
+    fun getModelfromGallery(context:Context , uri: Uri){
+        val fileName: String = generateRandomFileName()
+        val file = createFileFromUri(context, uri, fileName)
+        getModel(file)
+    }
+
+    fun createFileFromUri(context: Context, uri: Uri, fileName: String): File {
+        val contentResolver = context.contentResolver
+        val inputStream: InputStream? = contentResolver.openInputStream(uri)
+        val file = File(context.filesDir, fileName)
+
+        if (inputStream != null) {
+            writeInputStreamToFile(inputStream, file)
+        }
+
+        return file
+    }
+
+    fun writeInputStreamToFile(inputStream: InputStream, file: File) {
+        var outputStream: OutputStream? = null
+        try {
+            outputStream = FileOutputStream(file)
+            val buffer = ByteArray(4 * 1024) // Buffer de 4KB
+            var read: Int
+            while (inputStream.read(buffer).also { read = it } != -1) {
+                outputStream.write(buffer, 0, read)
+            }
+            outputStream.flush()
+        } finally {
+            inputStream.close()
+            outputStream?.close()
+        }
+    }
+
+    fun generateRandomFileName(): String {
+        val characters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+        val length = 12 // Puedes ajustar la longitud del nombre del archivo aquí
+        val random = Random()
+        val fileName = StringBuilder(length)
+        val extension: String = "jpg"
+
+        for (i in 0 until length) {
+            val index = random.nextInt(characters.length)
+            fileName.append(characters[index])
+        }
+
+        return "$fileName.$extension"
+    }
+
     fun resetResourceStates() {
         _model.value = ResourceState.NotInitialized()
         _modelPictures.value = ResourceState.NotInitialized()
         _modelsDetected.value = ResourceState.NotInitialized()
     }
 }
+// TEST //
+/*val modelObject = ModelDetected( "Ferrari","F50", "1995-1997", 0.9653,
+    mutableListOf(
+        "https://upload.wikimedia.org/wikipedia/commons/a/a5/1999_Ferrari_F50.jpg",
+        "https://s1.cdn.autoevolution.com/images/gallery/FERRARI-F50-1067_49.jpg",
+        "https://static.wikia.nocookie.net/hypercarss/images/9/9b/5402EC17-CBF7-4EBE-8F40-1D3A148C3464.jpeg/revision/latest?cb=20180411122943",
+        "https://static0.topspeedimages.com/wordpress/wp-content/uploads/jpg/201309/ferrari-f50.jpg",
+        "https://www.ultimatecarpage.com/images/car/186/Ferrari-F50-67449.jpg"))
+
+
+fun getModel(image: File) {
+        // Success //
+    _model.value = ResourceState.Success(ApiResponse(emptyList(),true, meta = Meta(5,"md5",
+        Parameters(0.25,180,180,181, "center", emptyList(), emptyList()), 14.5)))
+    _modelPictures.value = ResourceState.Success(GoogleApiResponse(com.jera.caracterisiticsv1.data.GoogleApiResponse.Context("Context"), emptyList(), "kind",
+        Queries(emptyList(), emptyList()),
+        SearchInformation("format","Formal",14.2, "0"),
+        Url("ey", "type")
+
+        // Errores //
+        _model.value = ResourceState.Error("Error test")
+        _modelPictures.value = ResourceState.Error("Error test")
+        _modelsDetected.value = ResourceState.Error("Error test")
+    ))
+}*/

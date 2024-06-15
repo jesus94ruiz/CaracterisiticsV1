@@ -3,10 +3,12 @@ package com.jera.caracterisiticsv1.screens
 import android.app.LauncherActivity
 import android.content.ActivityNotFoundException
 import android.content.Intent
+import android.net.Uri
 import android.provider.MediaStore
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -15,7 +17,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
-import androidx.compose.runtime.currentCompositionLocalContext
+import androidx.compose.runtime.*
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalContext
@@ -32,29 +34,30 @@ import com.jera.caracterisiticsv1.R
 //@Preview(showSystemUi = true, showBackground = true)
 @Composable
 fun MainScreen(navController: NavHostController){
-    Column(
-        modifier = Modifier
-            .background(Color(0x34, 0x3A, 0x40, 0xFF))
+    Surface(
+        modifier = Modifier.fillMaxHeight()
             .fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+        color = Color(0x34, 0x3A, 0x40, 0xFF)
     ) {
-        Header(navController)
-        Spacer(Modifier.size(50.dp))
-        ButtonCamera(navController)
-        Spacer(Modifier.size(30.dp))
-        ButtonGallery(navController)
-        Spacer(Modifier.size(30.dp))
-        ButtonGarage()
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Header(navController)
+            Spacer(Modifier.size(50.dp))
+            ButtonCamera(navController)
+            Spacer(Modifier.size(30.dp))
+            ButtonGallery(navController)
+            Spacer(Modifier.size(30.dp))
+            ButtonGarage()
+        }
     }
 }
 
 @Composable
 fun ButtonGallery(navController: NavHostController) {
-    val context = LocalContext.current
     Button(onClick = {
-/*        val galleryIntent = Intent(context, GalleryActivity::class.java)
-        context.startActivity(galleryIntent)*/
+        navController.navigate(AppScreens.GalleryScreen.route)
     },
         modifier = Modifier
             .height(180.dp)

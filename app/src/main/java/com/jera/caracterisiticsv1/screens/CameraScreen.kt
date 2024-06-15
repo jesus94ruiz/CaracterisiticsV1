@@ -63,10 +63,10 @@ fun CameraScreen(navController: NavHostController, cameraViewModel: CameraViewMo
                 Analysing()
             }
             is ResourceState.Success ->{
-                ResultsScreen(navController = navController)
+                ResultsScreen(navController = navController, "camera")
             }
             is ResourceState.Error ->{
-                ResultsScreen(navController = navController)
+                ResultsScreen(navController = navController, "camera")
             }
         }
     } else{

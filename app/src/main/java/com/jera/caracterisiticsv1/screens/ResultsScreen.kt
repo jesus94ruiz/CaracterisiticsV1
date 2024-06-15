@@ -30,7 +30,7 @@ import com.jera.caracterisiticsv1.ui.components.Analysing
 import com.jera.caracterisiticsv1.ui.theme.Poppins
 
 @Composable
-fun ResultsScreen(navController: NavHostController, cameraViewModel: CameraViewModel = hiltViewModel()){
+fun ResultsScreen(navController: NavHostController, origin: String, cameraViewModel: CameraViewModel = hiltViewModel()){
 
     println("----------------------------------------RESULTS_SCREEN---------------------------------------------------------------------")
     val modelsDetected by cameraViewModel.modelsDetected.collectAsState(ResourceState.NotInitialized())
@@ -50,17 +50,17 @@ fun ResultsScreen(navController: NavHostController, cameraViewModel: CameraViewM
                 Analysing()
             }
             is ResourceState.Success ->{
-                ResultsContent(modelsDetected = (modelsDetected as ResourceState.Success).data, navController)
+                ResultsContent(modelsDetected = (modelsDetected as ResourceState.Success).data, navController, origin)
             }
             is ResourceState.Error ->{
-                NoResultsContent(error = (modelsDetected as ResourceState.Error).error, navController, cameraViewModel)
+                NoResultsContent(error = (modelsDetected as ResourceState.Error).error, navController, origin)
                 println("Error")
             }
         }
     }
 }
 @Composable
-fun ResultsContent(modelsDetected: List<ModelDetected>, navController: NavHostController, cameraViewModel: CameraViewModel = hiltViewModel()) {
+fun ResultsContent(modelsDetected: List<ModelDetected>, navController: NavHostController,origin: String, cameraViewModel: CameraViewModel = hiltViewModel()) {
 
     Column(modifier = Modifier.padding(36.dp, 36.dp)) {
         Text(text = "¡Modelo encontrado!",
@@ -78,12 +78,12 @@ fun ResultsContent(modelsDetected: List<ModelDetected>, navController: NavHostCo
             fontFamily = Poppins,
             fontSize = 24.sp
         )
-        ButtonRow(navController, cameraViewModel)
+        ButtonRow(navController, cameraViewModel, origin)
     }
 }
 
 @Composable
-fun ButtonRow(navController: NavHostController, cameraViewModel: CameraViewModel = hiltViewModel()) {
+fun ButtonRow(navController: NavHostController, cameraViewModel: CameraViewModel = hiltViewModel(), origin: String) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -94,14 +94,32 @@ fun ButtonRow(navController: NavHostController, cameraViewModel: CameraViewModel
         SmallButtonWithIcon(
             text = "Home",
             icon = painterResource(id = R.drawable.home),
-            onClick = { navController.popBackStack(); cameraViewModel.resetResourceStates(); navController.navigate(AppScreens.MainScreen.route) }
+            onClick = {
+                if(origin == "camera"){
+                    navController.popBackStack();
+                    navController.navigate(AppScreens.MainScreen.route);
+                } else{
+                    navController.popBackStack();
+                    navController.navigate(AppScreens.MainScreen.route);
+                }
+                 cameraViewModel.resetResourceStates();
+            }
         )
 
         // Botón de Repetir
         SmallButtonWithIcon(
             text = "Repetir",
-            icon = painterResource(id = R.drawable.reload) ,
-            onClick = { navController.popBackStack(); cameraViewModel.resetResourceStates(); navController.navigate(AppScreens.CameraScreen.route) }
+            icon = painterResource(id = R.drawable.reload),
+            onClick = {
+                if(origin == "camera"){
+                    navController.popBackStack();
+                    navController.navigate(AppScreens.CameraScreen.route);
+                } else{
+                    navController.popBackStack()
+                    navController.navigate(AppScreens.GalleryScreen.route);
+                }
+                cameraViewModel.resetResourceStates();
+            }
         )
 
         // Botón de Guardar
@@ -142,12 +160,12 @@ fun SmallButtonWithIcon(text: String, icon: Painter, onClick: () -> Unit) {
         }
     }
 }
-
 //@Preview(showBackground = true, backgroundColor = 0x343A40FF)
 @Composable
 fun NoResultsContent(
     error: String,
     navController: NavHostController,
+    origin: String,
     cameraViewModel: CameraViewModel = hiltViewModel()
 ) {
 
@@ -206,7 +224,16 @@ fun NoResultsContent(
             SmallButtonWithIcon(
                 text = "Repetir",
                 icon = painterResource(id = R.drawable.reload),
-                onClick = { navController.navigate(AppScreens.CameraScreen.route); cameraViewModel.resetResourceStates() }
+                onClick = {
+                    if(origin == "camera"){
+                        navController.popBackStack()
+                        navController.navigate(AppScreens.CameraScreen.route);
+                    } else {
+                        navController.popBackStack()
+                        navController.navigate(AppScreens.GalleryScreen.route)
+                    }
+                    cameraViewModel.resetResourceStates()
+                }
             )
         }
     }
