@@ -34,6 +34,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.jera.caracterisiticsv1.ui.components.Analysing
 import com.jera.caracterisiticsv1.utilities.ResourceState
 import androidx.compose.runtime.getValue
+import com.jera.caracterisiticsv1.navigation.AppScreens
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
@@ -65,7 +66,7 @@ fun CameraScreen(navController: NavHostController, cameraViewModel: CameraViewMo
                 ResultsScreen(navController = navController)
             }
             is ResourceState.Error ->{
-                println("Error")
+                ResultsScreen(navController = navController)
             }
         }
     } else{
@@ -122,7 +123,8 @@ private fun cameraContent(
         }
         FloatingActionButton(
             onClick = {
-                    navController.popBackStack()
+                    navController.popBackStack();
+                    navController.navigate(AppScreens.MainScreen.route)
             },
             modifier = Modifier
                 .align(Alignment.BottomEnd)

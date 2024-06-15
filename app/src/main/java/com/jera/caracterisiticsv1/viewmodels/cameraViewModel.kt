@@ -25,19 +25,21 @@ import javax.inject.Inject
 @HiltViewModel
 class CameraViewModel @Inject constructor(
     private val cameraRepository: CameraRepository
-) : ViewModel(){
+) : ViewModel() {
 
-    val _model: MutableStateFlow<ResourceState<ApiResponse>> = MutableStateFlow(ResourceState.NotInitialized())
+    val _model: MutableStateFlow<ResourceState<ApiResponse>> =
+        MutableStateFlow(ResourceState.NotInitialized())
     val model: StateFlow<ResourceState<ApiResponse>> = _model
 
-    val _modelPictures: MutableStateFlow<ResourceState<GoogleApiResponse>> = MutableStateFlow(ResourceState.NotInitialized())
+    val _modelPictures: MutableStateFlow<ResourceState<GoogleApiResponse>> =
+        MutableStateFlow(ResourceState.NotInitialized())
     val modelPictures: MutableStateFlow<ResourceState<GoogleApiResponse>> = _modelPictures
 
     var detections: List<Detection> = emptyList()
-    val _modelsDetected: MutableStateFlow<ResourceState<MutableList<ModelDetected>>> = MutableStateFlow(ResourceState.Loading())
+    val _modelsDetected: MutableStateFlow<ResourceState<MutableList<ModelDetected>>> =
+        MutableStateFlow(ResourceState.Loading())
     val modelsDetected: StateFlow<ResourceState<MutableList<ModelDetected>>> = _modelsDetected
     val models: MutableList<ModelDetected> = mutableListOf()
-    //val modelsDetected: MutableList<ModelDetected> = mutableListOf()
 
     fun getModel(image: File) {
         viewModelScope.launch(Dispatchers.IO) {
@@ -48,16 +50,38 @@ class CameraViewModel @Inject constructor(
                         println(cameraResponse)
                         detections = cameraResponse.data.detections
                         if (detections.isNotEmpty())
-                            detections.forEach { detection ->
-                                detection.mmg.forEach { mmg ->
-                                    val model = ModelDetected(mmg.make_name, mmg.model_name, mmg.years, mmg.probability, mutableListOf<String>())
-                                    getModelPictures(model)
+                            if (detections[0].mmg.isEmpty()) {
+                                _model.value = ResourceState.Error(detections[0].status.message)
+                                _modelPictures.value =
+                                    ResourceState.Error(detections[0].status.message)
+                                _modelsDetected.value =
+                                    ResourceState.Error(detections[0].status.message)
+                            } else {
+                                detections.forEach { detection ->
+                                    detection.mmg.forEach { mmg ->
+                                        val model = ModelDetected(
+                                            mmg.make_name,
+                                            mmg.model_name,
+                                            mmg.years,
+                                            mmg.probability,
+                                            mutableListOf<String>()
+                                        )
+                                        getModelPictures(model)
+                                    }
                                 }
                             }
+                        if (detections.isEmpty()) {
+                            _model.value = ResourceState.Error("No se ha detectado ningún modelo")
+                            _modelPictures.value =
+                                ResourceState.Error("No se ha detectado ningún modelo")
+                            _modelsDetected.value =
+                                ResourceState.Error("No se ha detectado ningún modelo")
+                        }
                     }
                 }
         }
     }
+
 
     fun takePicture(cameraController: LifecycleCameraController, executor: Executor) {
         val file = File.createTempFile("imagentest", ".jpg")
@@ -71,6 +95,7 @@ class CameraViewModel @Inject constructor(
                     println(outputFileResults.savedUri.toString())
                     getModel(file)
                 }
+
                 override fun onError(exception: ImageCaptureException) {
                     println("Error al guardar la imagen: ${exception.message}")
                 }
@@ -108,5 +133,11 @@ class CameraViewModel @Inject constructor(
         println(model)
         println(modelsDetected)
         println("------------------------------")
+    }
+
+    fun resetResourceStates() {
+        _model.value = ResourceState.NotInitialized()
+        _modelPictures.value = ResourceState.NotInitialized()
+        _modelsDetected.value = ResourceState.NotInitialized()
     }
 }

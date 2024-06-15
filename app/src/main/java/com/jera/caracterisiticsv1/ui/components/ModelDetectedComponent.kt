@@ -18,17 +18,17 @@ import com.jera.caracterisiticsv1.ui.theme.Poppins
 
 @Composable
 fun ModelDetectedComponent(model: ModelDetected) {
-    println("----------------------------------------MODELCOMPONENT---------------------------------------------------------------------")
-    println(model)
+
+    val probabilityText = String.format("Al %.2f%% de probabilidad", model.probability * 100)
+
     Column(
-        modifier = Modifier.fillMaxSize().padding(8.dp, 24.dp)
     ) {
         Text(
             text = "${model.make_name}",
             modifier = Modifier.align(Alignment.CenterHorizontally),
             color = Color(0xE9, 0xEC, 0xEF, 0xFF),
             fontFamily = Poppins,
-            fontSize = 48.sp,
+            fontSize = 44.sp,
             textAlign = TextAlign.Center,
 
         )
@@ -37,7 +37,7 @@ fun ModelDetectedComponent(model: ModelDetected) {
             modifier = Modifier.align(Alignment.CenterHorizontally),
             color = Color(0xE9, 0xEC, 0xEF, 0xFF),
             fontFamily = Poppins,
-            fontSize = 48.sp,
+            fontSize = 44.sp,
             textAlign = TextAlign.Center,
 
             )
@@ -49,7 +49,7 @@ fun ModelDetectedComponent(model: ModelDetected) {
             fontSize = 24.sp
         )
         GoogleImageComponent(imageUrls = model.searchedImages)
-        Text(text = "Al ${model.probability * 100}% de probabilidad",
+        Text(text = probabilityText,
             modifier = Modifier.align(Alignment.CenterHorizontally),
             color = Color(0xE9, 0xEC, 0xEF, 0xFF),
             fontFamily = Poppins,

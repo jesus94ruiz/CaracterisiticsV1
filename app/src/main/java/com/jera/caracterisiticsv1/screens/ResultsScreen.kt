@@ -1,5 +1,6 @@
 package com.jera.caracterisiticsv1.screens
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -17,8 +18,10 @@ import com.jera.caracterisiticsv1.ui.components.ModelDetectedComponent
 import com.jera.caracterisiticsv1.utilities.ResourceState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
 import com.jera.caracterisiticsv1.R
@@ -50,16 +53,16 @@ fun ResultsScreen(navController: NavHostController, cameraViewModel: CameraViewM
                 ResultsContent(modelsDetected = (modelsDetected as ResourceState.Success).data, navController)
             }
             is ResourceState.Error ->{
+                NoResultsContent(error = (modelsDetected as ResourceState.Error).error, navController, cameraViewModel)
                 println("Error")
             }
         }
     }
 }
-
 @Composable
-fun ResultsContent(modelsDetected: List<ModelDetected>, navController: NavHostController) {
+fun ResultsContent(modelsDetected: List<ModelDetected>, navController: NavHostController, cameraViewModel: CameraViewModel = hiltViewModel()) {
 
-    Column(modifier = Modifier.padding(48.dp, 48.dp)) {
+    Column(modifier = Modifier.padding(36.dp, 36.dp)) {
         Text(text = "¡Modelo encontrado!",
             modifier = Modifier.align(Alignment.CenterHorizontally),
             color = Color(0xE9, 0xEC, 0xEF, 0xFF),
@@ -67,53 +70,38 @@ fun ResultsContent(modelsDetected: List<ModelDetected>, navController: NavHostCo
             fontSize = 24.sp
         )
         ModelDetectedComponent(modelsDetected[0])
-    }
-    Column(
-        modifier = Modifier.padding(top = 600.dp)
-    ) {
+        Spacer(modifier = Modifier.height(12.dp))
         Text(text = "¿Que deseas hacer?",
-            modifier = Modifier.align(Alignment.CenterHorizontally).padding(bottom = 50.dp),
+            modifier = Modifier
+                .align(Alignment.CenterHorizontally),
             color = Color(0xE9, 0xEC, 0xEF, 0xFF),
             fontFamily = Poppins,
             fontSize = 24.sp
         )
-        ButtonRow(navController)
+        ButtonRow(navController, cameraViewModel)
     }
-
-    /*
-    LazyRow(
-        modifier = modifier
-            .padding(16.dp)
-            .background(Color(0x34, 0x3A, 0x40, 0xFF))
-            .fillMaxWidth(),
-        ) {
-        items(modelsDetected) { model ->
-            println(model)
-            ModelDetectedComponent(model)
-        }
-    }*/
 }
 
 @Composable
-fun ButtonRow(navController: NavHostController) {
+fun ButtonRow(navController: NavHostController, cameraViewModel: CameraViewModel = hiltViewModel()) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(16.dp),
+            .padding(2.dp),
         horizontalArrangement = Arrangement.SpaceEvenly
     ) {
         // Botón de Home
         SmallButtonWithIcon(
             text = "Home",
             icon = painterResource(id = R.drawable.home),
-            onClick = { navController.navigate(AppScreens.MainScreen.route) }
+            onClick = { navController.popBackStack(); cameraViewModel.resetResourceStates(); navController.navigate(AppScreens.MainScreen.route) }
         )
 
         // Botón de Repetir
         SmallButtonWithIcon(
             text = "Repetir",
             icon = painterResource(id = R.drawable.reload) ,
-            onClick = { navController.navigate(AppScreens.CameraScreen.route) }
+            onClick = { navController.popBackStack(); cameraViewModel.resetResourceStates(); navController.navigate(AppScreens.CameraScreen.route) }
         )
 
         // Botón de Guardar
@@ -130,12 +118,14 @@ fun SmallButtonWithIcon(text: String, icon: Painter, onClick: () -> Unit) {
     Button(
         onClick = onClick,
         modifier = Modifier
-            .padding(8.dp)
-            .size(90.dp),
+            .padding(6.dp)
+            .size(90.dp, 64.dp),
         colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xE9, 0xEC, 0xEF, 0xFF)),
         shape = RoundedCornerShape(10)
     ) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Column(
+            modifier= Modifier.fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally) {
             Icon(
                 painter = icon,
                 contentDescription = text,
@@ -153,8 +143,76 @@ fun SmallButtonWithIcon(text: String, icon: Painter, onClick: () -> Unit) {
     }
 }
 
-/*
-@Preview(showBackground = true, backgroundColor = 0x343A40FF)
+//@Preview(showBackground = true, backgroundColor = 0x343A40FF)
+@Composable
+fun NoResultsContent(
+    error: String,
+    navController: NavHostController,
+    cameraViewModel: CameraViewModel = hiltViewModel()
+) {
+
+    Column(
+        modifier = Modifier.padding(48.dp, 48.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+    ) {
+        Text(
+            text = "Han ocurrido problemas al detectar el modelo",
+            modifier = Modifier.align(Alignment.CenterHorizontally),
+            color = Color(0xE9, 0xEC, 0xEF, 0xFF),
+            fontFamily = Poppins,
+            fontSize = 18.sp,
+            textAlign = TextAlign.Center,
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(
+            text = "Error: $error",
+            modifier = Modifier.align(Alignment.CenterHorizontally),
+            color = Color(0xE9, 0xEC, 0xEF, 0xFF),
+            fontFamily = Poppins,
+            fontSize = 12.sp,
+            textAlign = TextAlign.Center,
+        )
+        Spacer(modifier = Modifier.height(32.dp))
+        Icon(
+            painter = painterResource(id = R.drawable.flat_tire),
+            contentDescription = "NotFound",
+            modifier = Modifier.size(350.dp),
+            tint = Color(0xE9, 0xEC, 0xEF, 0xFF)
+        )
+        Spacer(modifier = Modifier.height(32.dp))
+        Text(
+            text = "¿Que deseas hacer?",
+            modifier = Modifier
+                .align(Alignment.CenterHorizontally),
+            color = Color(0xE9, 0xEC, 0xEF, 0xFF),
+            fontFamily = Poppins,
+            fontSize = 24.sp
+        )
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(8.dp),
+            horizontalArrangement = Arrangement.SpaceEvenly
+        ) {
+            // Botón de Home
+            SmallButtonWithIcon(
+                text = "Home",
+                icon = painterResource(id = R.drawable.home),
+                onClick = { navController.navigate(AppScreens.MainScreen.route); cameraViewModel.resetResourceStates()}
+            )
+
+            // Botón de Repetir
+            SmallButtonWithIcon(
+                text = "Repetir",
+                icon = painterResource(id = R.drawable.reload),
+                onClick = { navController.navigate(AppScreens.CameraScreen.route); cameraViewModel.resetResourceStates() }
+            )
+        }
+    }
+}
+
+/*@Preview(showBackground = true, backgroundColor = 0x343A40FF)
 @Composable
 fun previewResultsContent(){
     val model = ModelDetected( "Ferrari","F50", "1995-1997", 0.9653,
