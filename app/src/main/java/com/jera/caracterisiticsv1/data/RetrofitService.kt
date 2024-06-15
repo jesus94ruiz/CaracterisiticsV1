@@ -34,6 +34,5 @@ interface RetrofitService {
         @Query("num") numberImages: Int,
         @Query("cx") SEARCH_ENGINE_ID: String,
         @Query("searchType") searchType: String,
-        @Query("fileType") fileType: String,
     ): Response<GoogleApiResponse>
 }

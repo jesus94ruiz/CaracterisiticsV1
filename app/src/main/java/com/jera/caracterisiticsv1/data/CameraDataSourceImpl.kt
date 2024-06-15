@@ -24,7 +24,7 @@ class CameraDataSourceImpl @Inject constructor( private val retrofitService: Ret
             180,
             1f,
             3.15f,
-            "center",
+            "all",
             features,
             "DEF",
             imageMultipart
@@ -40,7 +40,6 @@ class CameraDataSourceImpl @Inject constructor( private val retrofitService: Ret
             5,
             "608be117b629e4b7d",
             "image",
-            "jpg"
         )
     }
 }

@@ -50,10 +50,11 @@ fun CameraScreen(navController: NavHostController, cameraViewModel: CameraViewMo
     val lifecycle = LocalLifecycleOwner.current
 
     val apiResponse by cameraViewModel.model.collectAsState(ResourceState.NotInitialized())
+    val googleApiResponse by cameraViewModel.model.collectAsState(ResourceState.NotInitialized())
 
     if(hasCameraPermission){
         println("hasCameraPermission")
-        when(apiResponse){
+        when(googleApiResponse){
             is ResourceState.NotInitialized ->{
                 cameraContent(cameraController, lifecycle, context, navController, cameraViewModel)
             }

@@ -9,6 +9,7 @@ import androidx.lifecycle.viewModelScope
 import com.jera.caracterisiticsv1.data.ApiResponse.ApiResponse
 import com.jera.caracterisiticsv1.data.ApiResponse.Detection
 import com.jera.caracterisiticsv1.data.GoogleApiResponse.GoogleApiResponse
+import com.jera.caracterisiticsv1.data.modelDetected.ModelDetected
 import com.jera.caracterisiticsv1.repository.CameraRepository
 import com.jera.caracterisiticsv1.utilities.ResourceState
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -26,24 +27,33 @@ class CameraViewModel @Inject constructor(
     private val cameraRepository: CameraRepository
 ) : ViewModel(){
 
-    var _model: MutableStateFlow<ResourceState<ApiResponse>> = MutableStateFlow(ResourceState.Loading())
-    var model: StateFlow<ResourceState<ApiResponse>> = _model
+    val _model: MutableStateFlow<ResourceState<ApiResponse>> = MutableStateFlow(ResourceState.NotInitialized())
+    val model: StateFlow<ResourceState<ApiResponse>> = _model
 
-    var _modelPictures: MutableStateFlow<ResourceState<GoogleApiResponse>> = MutableStateFlow(ResourceState.Loading())
-    var modelPictures: MutableStateFlow<ResourceState<GoogleApiResponse>> = _modelPictures
+    val _modelPictures: MutableStateFlow<ResourceState<GoogleApiResponse>> = MutableStateFlow(ResourceState.NotInitialized())
+    val modelPictures: MutableStateFlow<ResourceState<GoogleApiResponse>> = _modelPictures
 
     var detections: List<Detection> = emptyList()
+    val _modelsDetected: MutableStateFlow<ResourceState<MutableList<ModelDetected>>> = MutableStateFlow(ResourceState.Loading())
+    val modelsDetected: StateFlow<ResourceState<MutableList<ModelDetected>>> = _modelsDetected
+    val models: MutableList<ModelDetected> = mutableListOf()
+    //val modelsDetected: MutableList<ModelDetected> = mutableListOf()
 
-    fun getModel(image: File){
-        viewModelScope.launch (Dispatchers.IO) {
+    fun getModel(image: File) {
+        viewModelScope.launch(Dispatchers.IO) {
             cameraRepository.getModel(image)
-                .collectLatest {
-                    cameraResponse -> _model.value = cameraResponse
+                .collectLatest { cameraResponse ->
+                    _model.value = cameraResponse
                     if (cameraResponse is ResourceState.Success) {
                         println(cameraResponse)
                         detections = cameraResponse.data.detections
-                        if(detections.isNotEmpty())
-                            detections.forEach{ detection -> detection.mmg.forEach{ mmg ->  getModelPictures(mmg.make_name + " " + mmg.model_name + " " + mmg.years) } }
+                        if (detections.isNotEmpty())
+                            detections.forEach { detection ->
+                                detection.mmg.forEach { mmg ->
+                                    val model = ModelDetected(mmg.make_name, mmg.model_name, mmg.years, mmg.probability, mutableListOf<String>())
+                                    getModelPictures(model)
+                                }
+                            }
                     }
                 }
         }
@@ -68,19 +78,35 @@ class CameraViewModel @Inject constructor(
         )
     }
 
-    fun getModelPictures(query:String){
+    fun getModelPictures(model: ModelDetected) {
         println("--------GETMODELPICTURES-----------")
-        viewModelScope.launch (Dispatchers.IO) {
+        val query = "${model.make_name}" + " " + "${model.model_name}"
+        println(query)
+        viewModelScope.launch(Dispatchers.IO) {
             cameraRepository.getModelPictures(query)
-                .collectLatest {
-                        googleApiResponse -> _modelPictures.value = googleApiResponse
+                .collectLatest { googleApiResponse ->
                     if (googleApiResponse is ResourceState.Success) {
                         val responseData = googleApiResponse.data
                         Log.d("CameraViewModel", "Response: ${responseData}")
+                        responseData.items.forEach { item ->
+                            model.searchedImages.add(item.link)
+                            println("----")
+                            println(model)
+                            println("----")
+                        }
+                        models.add(model)
+                        println(models)
+                        println(_modelsDetected)
+                        _modelsDetected.value = ResourceState.Success(models)
+                        println(_modelsDetected)
+                        _modelPictures.value = googleApiResponse
                     } else if (googleApiResponse is ResourceState.Error) {
                         Log.e("CameraViewModel", "Error: ${googleApiResponse.error}")
                     }
                 }
         }
+        println(model)
+        println(modelsDetected)
+        println("------------------------------")
     }
 }
