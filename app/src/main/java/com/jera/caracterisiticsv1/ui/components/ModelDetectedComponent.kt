@@ -60,7 +60,9 @@ fun ModelDetectedComponent(model: ModelDetected) {
     }
 }
 
-@Preview(showBackground = true, backgroundColor = 0x343A40FF)
+
+// Pasar FILE para quitar Error! //
+/*@Preview(showBackground = true, backgroundColor = 0x343A40FF)
 @Composable
 fun previewModelDetectedComponent(){
     val model = ModelDetected( "Ferrari","F50", "1995-1997", 0.9653,
@@ -80,6 +82,6 @@ fun previewModelDetectedComponent(){
         )
     )
     ModelDetectedComponent(model = model)
-}
+}*/
 
 

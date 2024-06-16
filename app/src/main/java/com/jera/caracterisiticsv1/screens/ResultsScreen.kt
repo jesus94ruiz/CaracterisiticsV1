@@ -1,5 +1,8 @@
 package com.jera.caracterisiticsv1.screens
 
+import android.Manifest
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -11,8 +14,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
@@ -22,12 +24,11 @@ import androidx.navigation.NavHostController
 import com.jera.caracterisiticsv1.data.modelDetected.ModelDetected
 import com.jera.caracterisiticsv1.ui.components.ModelDetectedComponent
 import com.jera.caracterisiticsv1.utilities.ResourceState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -69,7 +70,7 @@ fun ResultsScreen(navController: NavHostController, origin: String, cameraViewMo
                     ) {
                     if ((modelsDetected as ResourceState.Success).data.isNotEmpty() && (page <= pageCount ) )
                         ResultsContent(
-                            modelsDetected = (modelsDetected as ResourceState.Success).data[page],
+                            model = (modelsDetected as ResourceState.Success).data[page],
                             navController,
                             origin
                         )
@@ -89,7 +90,7 @@ fun ResultsScreen(navController: NavHostController, origin: String, cameraViewMo
 }
 
 @Composable
-fun ResultsContent(modelsDetected: ModelDetected, navController: NavHostController,origin: String, cameraViewModel: CameraViewModel = hiltViewModel()) {
+fun ResultsContent(model: ModelDetected, navController: NavHostController, origin: String, cameraViewModel: CameraViewModel = hiltViewModel()) {
 
     Column(modifier = Modifier.padding(36.dp, 36.dp)) {
         Text(text = "¡Modelo encontrado!",
@@ -98,7 +99,7 @@ fun ResultsContent(modelsDetected: ModelDetected, navController: NavHostControll
             fontFamily = Poppins,
             fontSize = 24.sp
         )
-        ModelDetectedComponent(modelsDetected)
+        ModelDetectedComponent(model)
         Spacer(modifier = Modifier.height(64.dp))
         Text(text = "¿Que deseas hacer?",
             modifier = Modifier
@@ -107,12 +108,24 @@ fun ResultsContent(modelsDetected: ModelDetected, navController: NavHostControll
             fontFamily = Poppins,
             fontSize = 24.sp
         )
-        ButtonRow(navController, cameraViewModel, origin)
+        ButtonRow(navController, model, origin)
     }
 }
 
 @Composable
-fun ButtonRow(navController: NavHostController, cameraViewModel: CameraViewModel = hiltViewModel(), origin: String) {
+fun ButtonRow(navController: NavHostController, model: ModelDetected, origin: String, cameraViewModel: CameraViewModel = hiltViewModel()) {
+
+    // Manejo de permisos para guardar imagen
+    val context = LocalContext.current
+    val permissionsGranted = remember { mutableStateOf(false) }
+
+    val permissionsLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestMultiplePermissions()
+    ) { permissions ->
+        permissionsGranted.value = permissions[Manifest.permission.WRITE_EXTERNAL_STORAGE] == true &&
+                permissions[Manifest.permission.READ_EXTERNAL_STORAGE] == true
+    }
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -155,7 +168,12 @@ fun ButtonRow(navController: NavHostController, cameraViewModel: CameraViewModel
         SmallButtonWithIcon(
             text = "Guardar",
             icon = painterResource(id = R.drawable.car_in_garage),
-            onClick = { /* Acción del botón Guardar */ }
+            onClick = {
+                if(cameraViewModel.checkAndRequestPermissions(context, permissionsLauncher)){
+                    cameraViewModel.saveFileToStorage(model.file, context)
+                }
+
+            }
         )
     }
 }

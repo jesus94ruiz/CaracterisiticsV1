@@ -1,11 +1,15 @@
 package com.jera.caracterisiticsv1.viewmodels
 
+import android.Manifest
 import android.content.Context
 import android.net.Uri
+import android.os.Environment
 import android.util.Log
+import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCaptureException
 import androidx.camera.view.LifecycleCameraController
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.jera.caracterisiticsv1.data.ApiResponse.ApiResponse
@@ -32,6 +36,8 @@ import java.io.OutputStream
 import java.util.*
 import java.util.concurrent.Executor
 import javax.inject.Inject
+import android.content.pm.PackageManager
+import androidx.compose.ui.platform.LocalContext
 
 @HiltViewModel
 class CameraViewModel @Inject constructor(
@@ -57,7 +63,43 @@ class CameraViewModel @Inject constructor(
     var pageCount: Int = 0;
 
 
-    fun getModel(image: File) {
+    // TEST //
+/*val modelObject = ModelDetected( "Ferrari","F50", "1995-1997", 0.9653,
+    mutableListOf(
+        "https://upload.wikimedia.org/wikipedia/commons/a/a5/1999_Ferrari_F50.jpg",
+        "https://s1.cdn.autoevolution.com/images/gallery/FERRARI-F50-1067_49.jpg",
+        "https://static.wikia.nocookie.net/hypercarss/images/9/9b/5402EC17-CBF7-4EBE-8F40-1D3A148C3464.jpeg/revision/latest?cb=20180411122943",
+        "https://static0.topspeedimages.com/wordpress/wp-content/uploads/jpg/201309/ferrari-f50.jpg",
+        "https://www.ultimatecarpage.com/images/car/186/Ferrari-F50-67449.jpg"),
+    )*/
+
+
+fun getModel(image: File) {
+        // Success //
+    _model.value = ResourceState.Success(ApiResponse(
+        mutableListOf()
+        ,true, meta = Meta(5,"md5",
+        Parameters(0.25,180,180,181, "center", emptyList(), emptyList()), 14.5)))
+    _modelPictures.value = ResourceState.Success(GoogleApiResponse(com.jera.caracterisiticsv1.data.GoogleApiResponse.Context("Context"), emptyList(), "kind",
+        Queries(emptyList(), emptyList()),
+        SearchInformation("format","Formal",14.2, "0"),
+        Url("ey", "type")
+
+    ))
+    val model = ModelDetected( "Ferrari","F50", "1995-1997", 0.9653,
+        mutableListOf(
+            "https://upload.wikimedia.org/wikipedia/commons/a/a5/1999_Ferrari_F50.jpg",
+            "https://s1.cdn.autoevolution.com/images/gallery/FERRARI-F50-1067_49.jpg",
+            "https://static.wikia.nocookie.net/hypercarss/images/9/9b/5402EC17-CBF7-4EBE-8F40-1D3A148C3464.jpeg/revision/latest?cb=20180411122943",
+            "https://static0.topspeedimages.com/wordpress/wp-content/uploads/jpg/201309/ferrari-f50.jpg",
+            "https://www.ultimatecarpage.com/images/car/186/Ferrari-F50-67449.jpg"),
+        image
+    )
+    _modelsDetected.value = ResourceState.Success(mutableListOf(model))
+}
+
+
+/*    fun getModel(image: File) {
      viewModelScope.launch(Dispatchers.IO) {
             cameraRepository.getModel(image)
                 .collectLatest { cameraResponse ->
@@ -80,7 +122,8 @@ class CameraViewModel @Inject constructor(
                                             mmg.model_name,
                                             mmg.years,
                                             mmg.probability,
-                                            mutableListOf<String>()
+                                            mutableListOf<String>(),
+                                            file = image
                                         )
                                         getModelPictures(model)
                                         pageCount++;
@@ -97,7 +140,7 @@ class CameraViewModel @Inject constructor(
                     }
                 }
         }
-    }
+    }*/
 
 
     fun takePicture(cameraController: LifecycleCameraController, executor: Executor) {
@@ -165,7 +208,6 @@ class CameraViewModel @Inject constructor(
         if (inputStream != null) {
             writeInputStreamToFile(inputStream, file)
         }
-
         return file
     }
 
@@ -205,6 +247,51 @@ class CameraViewModel @Inject constructor(
         _modelPictures.value = ResourceState.NotInitialized()
         _modelsDetected.value = ResourceState.NotInitialized()
     }
+
+    fun saveFileToStorage(image: File, context: Context) {
+        println("imageName: ${image.name}")
+        try {
+            val storageDir = context.getExternalFilesDir(Environment.DIRECTORY_PICTURES)
+            if (!storageDir!!.exists()) {
+                storageDir.mkdirs()
+            }
+
+            val file = File(storageDir, image.name)
+            val inputStream: InputStream = image.inputStream()
+            val outputStream: FileOutputStream = FileOutputStream(file)
+
+            inputStream.use { input ->
+                outputStream.use { output ->
+                    input.copyTo(output)
+                }
+            }
+            println("File saved to ${file.absolutePath}")
+        } catch (e: Exception) {
+            e.printStackTrace()
+            println("Failed to save file: ${e.message}")
+        }
+    }
+
+    fun checkAndRequestPermissions(
+        context: Context,
+        permissionsLauncher: ManagedActivityResultLauncher<Array<String>, Map<String, Boolean>>
+    ):Boolean{
+        if (ContextCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED ||
+            ContextCompat.checkSelfPermission(context, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+
+            // Permisos no concedidos, solicitarlos
+            permissionsLauncher.launch(arrayOf(
+                Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                Manifest.permission.READ_EXTERNAL_STORAGE
+            ))
+        } else {
+            // Permisos ya concedidos, actualizar el estado
+            permissionsLauncher.launch(emptyArray())
+            return true;
+        }
+        return false
+    }
+
 }
 // TEST //
 /*val modelObject = ModelDetected( "Ferrari","F50", "1995-1997", 0.9653,
