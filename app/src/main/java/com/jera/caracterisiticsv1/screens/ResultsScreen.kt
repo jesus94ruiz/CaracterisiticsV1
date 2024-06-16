@@ -1,10 +1,16 @@
 package com.jera.caracterisiticsv1.screens
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.pager.PageSize
+import androidx.compose.foundation.pager.VerticalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
@@ -17,9 +23,11 @@ import com.jera.caracterisiticsv1.data.modelDetected.ModelDetected
 import com.jera.caracterisiticsv1.ui.components.ModelDetectedComponent
 import com.jera.caracterisiticsv1.utilities.ResourceState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -29,38 +37,59 @@ import com.jera.caracterisiticsv1.navigation.AppScreens
 import com.jera.caracterisiticsv1.ui.components.Analysing
 import com.jera.caracterisiticsv1.ui.theme.Poppins
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ResultsScreen(navController: NavHostController, origin: String, cameraViewModel: CameraViewModel = hiltViewModel()){
 
     println("----------------------------------------RESULTS_SCREEN---------------------------------------------------------------------")
     val modelsDetected by cameraViewModel.modelsDetected.collectAsState(ResourceState.NotInitialized())
-
-    println(modelsDetected)
-
-    Surface(
-        modifier = Modifier.fillMaxSize(),
-        color = Color(0x34, 0x3A, 0x40, 0xFF)
+    var pageCount:Int = if (cameraViewModel.pageCount == 0) 1 else cameraViewModel.pageCount
+    val pagerState = rememberPagerState(
+        initialPage = 0,
+        initialPageOffsetFraction = 0f
     )
-    {
-        when(modelsDetected){
-            is ResourceState.NotInitialized ->{
-                Analysing()
-            }
-            is ResourceState.Loading ->{
-                Analysing()
-            }
-            is ResourceState.Success ->{
-                ResultsContent(modelsDetected = (modelsDetected as ResourceState.Success).data, navController, origin)
-            }
-            is ResourceState.Error ->{
-                NoResultsContent(error = (modelsDetected as ResourceState.Error).error, navController, origin)
-                println("Error")
+    VerticalPager(
+        state = pagerState,
+        pageSize = PageSize.Fill,
+        pageSpacing = 8.dp,
+        pageCount = pageCount
+    ){ page: Int ->
+
+        Surface(
+            modifier = Modifier.fillMaxSize(),
+            color = Color(0x34, 0x3A, 0x40, 0xFF)
+        )
+        {
+            when(modelsDetected){
+                is ResourceState.NotInitialized, is ResourceState.Loading -> Analysing()
+
+                is ResourceState.Success ->{
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                    if ((modelsDetected as ResourceState.Success).data.isNotEmpty() && (page <= pageCount ) )
+                        ResultsContent(
+                            modelsDetected = (modelsDetected as ResourceState.Success).data[page],
+                            navController,
+                            origin
+                        )
+                    if(page < pageCount-1)
+                        moreResults()
+                    }
+                }
+                is ResourceState.Error ->{
+                    NoResultsContent(error = (modelsDetected as ResourceState.Error).error, navController, origin)
+                    println("Error")
+                }
             }
         }
+
     }
+
 }
+
 @Composable
-fun ResultsContent(modelsDetected: List<ModelDetected>, navController: NavHostController,origin: String, cameraViewModel: CameraViewModel = hiltViewModel()) {
+fun ResultsContent(modelsDetected: ModelDetected, navController: NavHostController,origin: String, cameraViewModel: CameraViewModel = hiltViewModel()) {
 
     Column(modifier = Modifier.padding(36.dp, 36.dp)) {
         Text(text = "¡Modelo encontrado!",
@@ -69,8 +98,8 @@ fun ResultsContent(modelsDetected: List<ModelDetected>, navController: NavHostCo
             fontFamily = Poppins,
             fontSize = 24.sp
         )
-        ModelDetectedComponent(modelsDetected[0])
-        Spacer(modifier = Modifier.height(12.dp))
+        ModelDetectedComponent(modelsDetected)
+        Spacer(modifier = Modifier.height(64.dp))
         Text(text = "¿Que deseas hacer?",
             modifier = Modifier
                 .align(Alignment.CenterHorizontally),
@@ -236,6 +265,26 @@ fun NoResultsContent(
                 }
             )
         }
+    }
+}
+@Composable
+fun moreResults() {
+    Column {
+        Text(text = "Otros modelos encontrados",
+            modifier = Modifier.align(Alignment.CenterHorizontally),
+            color = Color(0xE9, 0xEC, 0xEF, 0x80),
+            fontFamily = Poppins,
+            fontSize = 12.sp,
+            textAlign = TextAlign.Center,
+        )
+        Icon(
+            imageVector = Icons.Default.ArrowDropDown,
+            contentDescription = "Arrow Down",
+            tint = Color(0xE9, 0xEC, 0xEF, 0x80),
+            modifier = Modifier
+                .size(32.dp)
+                .align(Alignment.CenterHorizontally)
+        )
     }
 }
 

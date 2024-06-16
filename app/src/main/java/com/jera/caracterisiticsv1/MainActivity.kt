@@ -18,13 +18,7 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             CaracterisiticsV1Theme {
-                // A surface container using the 'background' color from the theme
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colors.background
-                ) {
-                    AppNavigation()
-                }
+                AppNavigation()
             }
         }
     }

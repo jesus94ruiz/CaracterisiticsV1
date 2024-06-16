@@ -43,11 +43,12 @@ fun ImageCard(imageUrl: String) {
             .padding(8.dp)
             .size(300.dp, 169.dp)
     ) {
-        Image(
-            painter = rememberAsyncImagePainter(imageUrl),
+        AsyncImage(
+            model = imageUrl,
+            //painter = rememberAsyncImagePainter(imageUrl),
             contentDescription = null,
             modifier = Modifier.fillMaxSize(),
-            contentScale = ContentScale.Crop
+            contentScale = ContentScale.FillBounds
         )
     }
 }

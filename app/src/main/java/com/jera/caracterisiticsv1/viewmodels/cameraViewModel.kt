@@ -47,10 +47,14 @@ class CameraViewModel @Inject constructor(
     val modelPictures: MutableStateFlow<ResourceState<GoogleApiResponse>> = _modelPictures
 
     var detections: List<Detection> = emptyList()
+
     val _modelsDetected: MutableStateFlow<ResourceState<MutableList<ModelDetected>>> =
         MutableStateFlow(ResourceState.Loading())
     val modelsDetected: StateFlow<ResourceState<MutableList<ModelDetected>>> = _modelsDetected
+
     val models: MutableList<ModelDetected> = mutableListOf()
+
+    var pageCount: Int = 0;
 
 
     fun getModel(image: File) {
@@ -79,6 +83,7 @@ class CameraViewModel @Inject constructor(
                                             mutableListOf<String>()
                                         )
                                         getModelPictures(model)
+                                        pageCount++;
                                     }
                                 }
                             }
@@ -117,7 +122,7 @@ class CameraViewModel @Inject constructor(
 
     fun getModelPictures(model: ModelDetected) {
         println("--------GETMODELPICTURES-----------")
-        val query = "${model.make_name}" + " " + "${model.model_name}"
+        val query = "wallpaper" + " " + "${model.make_name}" + " " + "${model.model_name}" + " " + "${model.years}"
         println(query)
         viewModelScope.launch(Dispatchers.IO) {
             cameraRepository.getModelPictures(query)
@@ -127,24 +132,23 @@ class CameraViewModel @Inject constructor(
                         Log.d("CameraViewModel", "Response: ${responseData}")
                         responseData.items.forEach { item ->
                             model.searchedImages.add(item.link)
-                            println("----")
-                            println(model)
-                            println("----")
                         }
                         models.add(model)
-                        println(models)
-                        println(_modelsDetected)
+                        orderByProbability(models)
                         _modelsDetected.value = ResourceState.Success(models)
-                        println(_modelsDetected)
                         _modelPictures.value = googleApiResponse
+                        println(models)
                     } else if (googleApiResponse is ResourceState.Error) {
                         Log.e("CameraViewModel", "Error: ${googleApiResponse.error}")
+                        _modelPictures.value = ResourceState.Error("${googleApiResponse.error}")
+                        _modelsDetected.value = ResourceState.Error("${googleApiResponse.error}\n"  + "El modelo detectado ha sido: \n" + "${model.make_name}" + " " + "${model.model_name}" + " " + "${model.years}" )
                     }
                 }
         }
-        println(model)
-        println(modelsDetected)
-        println("------------------------------")
+    }
+
+    fun orderByProbability(models: MutableList<ModelDetected>) {
+        models.sortByDescending { it.probability }
     }
 
     fun getModelfromGallery(context:Context , uri: Uri){

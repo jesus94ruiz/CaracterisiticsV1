@@ -19,6 +19,9 @@ import com.jera.caracterisiticsv1.ui.theme.Poppins
 @Composable
 fun ModelDetectedComponent(model: ModelDetected) {
 
+    println("---------------------ModelsComponent-------------------")
+    println(model)
+
     val probabilityText = String.format("Al %.2f%% de probabilidad", model.probability * 100)
 
     Column(
