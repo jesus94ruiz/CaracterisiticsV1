@@ -171,6 +171,8 @@ fun ButtonRow(navController: NavHostController, model: ModelDetected, origin: St
             onClick = {
                 if(cameraViewModel.checkAndRequestPermissions(context, permissionsLauncher)){
                     cameraViewModel.saveFileToStorage(model.file, context)
+                    cameraViewModel.insertModel(model)
+                    navController.navigate(AppScreens.GarageScreen.route)
                 }
 
             }

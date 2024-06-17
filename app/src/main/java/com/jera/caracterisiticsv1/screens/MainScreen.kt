@@ -49,7 +49,7 @@ fun MainScreen(navController: NavHostController){
             Spacer(Modifier.size(30.dp))
             ButtonGallery(navController)
             Spacer(Modifier.size(30.dp))
-            ButtonGarage()
+            ButtonGarage(navController)
         }
     }
 }
@@ -124,8 +124,8 @@ fun ButtonCamera(navController: NavHostController) {
 }
 
 @Composable
-fun ButtonGarage() {
-    Button(onClick = {},
+fun ButtonGarage(navController: NavHostController) {
+    Button(onClick = { navController.navigate(AppScreens.GarageScreen.route) },
         modifier = Modifier
             .height(180.dp)
             .width(180.dp)

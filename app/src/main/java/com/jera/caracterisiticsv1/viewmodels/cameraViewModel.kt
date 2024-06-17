@@ -38,10 +38,13 @@ import java.util.concurrent.Executor
 import javax.inject.Inject
 import android.content.pm.PackageManager
 import androidx.compose.ui.platform.LocalContext
+import com.jera.caracterisiticsv1.data.modelDetected.toDatabase
+import com.jera.caracterisiticsv1.repository.databaseRepository
 
 @HiltViewModel
 class CameraViewModel @Inject constructor(
-    private val cameraRepository: CameraRepository
+    private val cameraRepository: CameraRepository,
+    private val databaseRepository: databaseRepository
 ) : ViewModel() {
 
     val _model: MutableStateFlow<ResourceState<ApiResponse>> =
@@ -74,7 +77,7 @@ class CameraViewModel @Inject constructor(
     )*/
 
 
-fun getModel(image: File) {
+/*fun getModel(image: File) {
         // Success //
     _model.value = ResourceState.Success(ApiResponse(
         mutableListOf()
@@ -96,10 +99,10 @@ fun getModel(image: File) {
         image
     )
     _modelsDetected.value = ResourceState.Success(mutableListOf(model))
-}
+}*/
 
 
-/*    fun getModel(image: File) {
+   fun getModel(image: File) {
      viewModelScope.launch(Dispatchers.IO) {
             cameraRepository.getModel(image)
                 .collectLatest { cameraResponse ->
@@ -140,7 +143,7 @@ fun getModel(image: File) {
                     }
                 }
         }
-    }*/
+    }
 
 
     fun takePicture(cameraController: LifecycleCameraController, executor: Executor) {
@@ -276,6 +279,7 @@ fun getModel(image: File) {
         context: Context,
         permissionsLauncher: ManagedActivityResultLauncher<Array<String>, Map<String, Boolean>>
     ):Boolean{
+        println("PERMISOS")
         if (ContextCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED ||
             ContextCompat.checkSelfPermission(context, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
 
@@ -290,6 +294,10 @@ fun getModel(image: File) {
             return true;
         }
         return false
+    }
+
+    fun insertModel(model: ModelDetected) {
+        viewModelScope.launch { databaseRepository.insertModel(model.toDatabase()) }
     }
 
 }

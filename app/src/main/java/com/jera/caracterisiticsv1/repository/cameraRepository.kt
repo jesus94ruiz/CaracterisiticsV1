@@ -45,4 +45,6 @@ class CameraRepository @Inject constructor( private val cameraDataSource: Camera
             }
         }.catch { e -> emit(ResourceState.Error(e?.localizedMessage ?: "Error happened in flow")) }
     }
+
+
 }

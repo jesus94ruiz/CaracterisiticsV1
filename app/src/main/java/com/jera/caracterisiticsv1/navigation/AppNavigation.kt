@@ -34,5 +34,8 @@ fun AppNavigation(){
         composable(AppScreens.GalleryScreen.route){
             GalleryScreen(navController)
         }
+        composable(AppScreens.GarageScreen.route){
+            GarageScreen(navController)
+        }
     }
 }
