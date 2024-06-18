@@ -14,8 +14,11 @@ import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import coil.compose.AsyncImage
+import coil.request.ImageRequest
+import coil.size.Size
 
 @Composable
 fun GoogleImageComponent(imageUrls: List<String>) {
@@ -44,11 +47,15 @@ fun ImageCard(imageUrl: String) {
             .size(300.dp, 169.dp)
     ) {
         AsyncImage(
-            model = imageUrl,
+            model = ImageRequest.Builder(LocalContext.current)
+                .data(imageUrl)
+                .size(Size.ORIGINAL)
+                .crossfade(true)
+                .build(),
             //painter = rememberAsyncImagePainter(imageUrl),
             contentDescription = null,
             modifier = Modifier.fillMaxSize(),
-            contentScale = ContentScale.FillBounds
+            contentScale = ContentScale.FillWidth
         )
     }
 }

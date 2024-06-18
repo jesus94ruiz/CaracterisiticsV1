@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.jera.caracterisiticsv1.data.domain.model.CarModel
 import com.jera.caracterisiticsv1.repository.CameraRepository
-import com.jera.caracterisiticsv1.repository.databaseRepository
+import com.jera.caracterisiticsv1.repository.DatabaseRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -14,7 +14,7 @@ import javax.inject.Inject
 @HiltViewModel
 class GarageViewModel @Inject constructor(
     private val cameraRepository: CameraRepository,
-    private val databaseRepository: databaseRepository
+    private val databaseRepository: DatabaseRepository
 ) : ViewModel() {
 
     var carModels: List<CarModel> = emptyList()

@@ -6,7 +6,7 @@ import com.jera.caracterisiticsv1.data.domain.model.CarModel
 import com.jera.caracterisiticsv1.data.domain.model.toDomain
 import javax.inject.Inject
 
-class databaseRepository @Inject constructor(private val modelEntityDao: ModelEntityDao){
+class DatabaseRepository @Inject constructor(private val modelEntityDao: ModelEntityDao){
 
     suspend fun getModelsFromDatabase(): List<CarModel>{
         val response: List<ModelEntity> = modelEntityDao.getAllModels()

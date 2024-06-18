@@ -37,14 +37,15 @@ import java.util.*
 import java.util.concurrent.Executor
 import javax.inject.Inject
 import android.content.pm.PackageManager
+import android.os.Build
 import androidx.compose.ui.platform.LocalContext
 import com.jera.caracterisiticsv1.data.modelDetected.toDatabase
-import com.jera.caracterisiticsv1.repository.databaseRepository
+import com.jera.caracterisiticsv1.repository.DatabaseRepository
 
 @HiltViewModel
 class CameraViewModel @Inject constructor(
     private val cameraRepository: CameraRepository,
-    private val databaseRepository: databaseRepository
+    private val databaseRepository: DatabaseRepository
 ) : ViewModel() {
 
     val _model: MutableStateFlow<ResourceState<ApiResponse>> =
@@ -278,25 +279,54 @@ class CameraViewModel @Inject constructor(
     fun checkAndRequestPermissions(
         context: Context,
         permissionsLauncher: ManagedActivityResultLauncher<Array<String>, Map<String, Boolean>>
-    ):Boolean{
+    ): Boolean {
         println("PERMISOS")
-        if (ContextCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED ||
-            ContextCompat.checkSelfPermission(context, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
 
-            // Permisos no concedidos, solicitarlos
-            permissionsLauncher.launch(arrayOf(
-                Manifest.permission.WRITE_EXTERNAL_STORAGE,
+        //Permisos Android 14
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(context, Manifest.permission.READ_MEDIA_IMAGES)
+                != PackageManager.PERMISSION_GRANTED
+            ) {
+
+            permissionsLauncher.launch(
+                arrayOf(
+                    Manifest.permission.READ_MEDIA_IMAGES,
+                )
+            )} else{
+                return true
+            }
+        // Permisos Android anteriores
+        } else if (ContextCompat.checkSelfPermission(
+                context,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE
+            ) != PackageManager.PERMISSION_GRANTED ||
+            ContextCompat.checkSelfPermission(
+                context,
                 Manifest.permission.READ_EXTERNAL_STORAGE
-            ))
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+
+            println("Permisos No Concedidos")
+            // Permisos no concedidos, solicitarlos
+            permissionsLauncher.launch(
+                arrayOf(
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                    Manifest.permission.READ_EXTERNAL_STORAGE,
+                    Manifest.permission.READ_MEDIA_IMAGES,
+                    Manifest.permission.READ_MEDIA_AUDIO,
+                )
+            )
         } else {
+            println("Permisos Concedidos")
             // Permisos ya concedidos, actualizar el estado
             permissionsLauncher.launch(emptyArray())
             return true;
         }
+        println("Return false")
         return false
     }
 
-    fun insertModel(model: ModelDetected) {
+        fun insertModel(model: ModelDetected) {
         viewModelScope.launch { databaseRepository.insertModel(model.toDatabase()) }
     }
 
