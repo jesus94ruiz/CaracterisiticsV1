@@ -1,6 +1,6 @@
-package com.jera.caracterisiticsv1.data.GoogleApiResponse
+package com.jera.caracterisiticsv1.data.ApiResponse.GoogleApiResponse
 
-data class Request(
+data class NextPage(
     val count: Int,
     val cx: String,
     val fileType: String,

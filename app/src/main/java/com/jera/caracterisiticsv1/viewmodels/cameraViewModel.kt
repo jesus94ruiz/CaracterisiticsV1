@@ -16,10 +16,10 @@ import com.jera.caracterisiticsv1.data.ApiResponse.ApiResponse
 import com.jera.caracterisiticsv1.data.ApiResponse.Detection
 import com.jera.caracterisiticsv1.data.ApiResponse.Meta
 import com.jera.caracterisiticsv1.data.ApiResponse.Parameters
-import com.jera.caracterisiticsv1.data.GoogleApiResponse.GoogleApiResponse
-import com.jera.caracterisiticsv1.data.GoogleApiResponse.Queries
-import com.jera.caracterisiticsv1.data.GoogleApiResponse.SearchInformation
-import com.jera.caracterisiticsv1.data.GoogleApiResponse.Url
+import com.jera.caracterisiticsv1.data.ApiResponse.GoogleApiResponse.GoogleApiResponse
+import com.jera.caracterisiticsv1.data.ApiResponse.GoogleApiResponse.Queries
+import com.jera.caracterisiticsv1.data.ApiResponse.GoogleApiResponse.SearchInformation
+import com.jera.caracterisiticsv1.data.ApiResponse.GoogleApiResponse.Url
 import com.jera.caracterisiticsv1.data.modelDetected.ModelDetected
 import com.jera.caracterisiticsv1.repository.CameraRepository
 import com.jera.caracterisiticsv1.utilities.ResourceState
@@ -105,22 +105,19 @@ class CameraViewModel @Inject constructor(
 
    fun getModel(image: File) {
      viewModelScope.launch(Dispatchers.IO) {
-            cameraRepository.getModel(image)
-                .collectLatest { cameraResponse ->
-                    _model.value = cameraResponse
+            cameraRepository.getModel(image).collectLatest {
+                    cameraResponse -> _model.value = cameraResponse
                     if (cameraResponse is ResourceState.Success) {
                         println(cameraResponse)
                         detections = cameraResponse.data.detections
                         if (detections.isNotEmpty())
                             if (detections[0].mmg.isEmpty()) {
                                 _model.value = ResourceState.Error(detections[0].status.message)
-                                _modelPictures.value =
-                                    ResourceState.Error(detections[0].status.message)
-                                _modelsDetected.value =
-                                    ResourceState.Error(detections[0].status.message)
+                                _modelPictures.value = ResourceState.Error(detections[0].status.message)
+                                _modelsDetected.value = ResourceState.Error(detections[0].status.message)
                             } else {
-                                detections.forEach { detection ->
-                                    detection.mmg.forEach { mmg ->
+                                detections.forEach {
+                                        detection -> detection.mmg.forEach { mmg ->
                                         val model = ModelDetected(
                                             mmg.make_name,
                                             mmg.model_name,
@@ -136,10 +133,8 @@ class CameraViewModel @Inject constructor(
                             }
                         if (detections.isEmpty()) {
                             _model.value = ResourceState.Error("No se ha detectado ningún modelo")
-                            _modelPictures.value =
-                                ResourceState.Error("No se ha detectado ningún modelo")
-                            _modelsDetected.value =
-                                ResourceState.Error("No se ha detectado ningún modelo")
+                            _modelPictures.value = ResourceState.Error("No se ha detectado ningún modelo")
+                            _modelsDetected.value = ResourceState.Error("No se ha detectado ningún modelo")
                         }
                     }
                 }
@@ -172,14 +167,11 @@ class CameraViewModel @Inject constructor(
         val query = "wallpaper" + " " + "${model.make_name}" + " " + "${model.model_name}" + " " + "${model.years}"
         println(query)
         viewModelScope.launch(Dispatchers.IO) {
-            cameraRepository.getModelPictures(query)
-                .collectLatest { googleApiResponse ->
-                    if (googleApiResponse is ResourceState.Success) {
+            cameraRepository.getModelPictures(query).collectLatest {
+                    googleApiResponse -> if (googleApiResponse is ResourceState.Success) {
                         val responseData = googleApiResponse.data
                         Log.d("CameraViewModel", "Response: ${responseData}")
-                        responseData.items.forEach { item ->
-                            model.searchedImages.add(item.link)
-                        }
+                        responseData.items.forEach { item -> model.searchedImages.add(item.link) }
                         models.add(model)
                         orderByProbability(models)
                         _modelsDetected.value = ResourceState.Success(models)
@@ -233,7 +225,7 @@ class CameraViewModel @Inject constructor(
 
     fun generateRandomFileName(): String {
         val characters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-        val length = 12 // Puedes ajustar la longitud del nombre del archivo aquí
+        val length = 12
         val random = Random()
         val fileName = StringBuilder(length)
         val extension: String = "jpg"

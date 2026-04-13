@@ -1,7 +1,7 @@
 package com.jera.caracterisiticsv1.data
 
 import com.jera.caracterisiticsv1.data.ApiResponse.ApiResponse
-import com.jera.caracterisiticsv1.data.GoogleApiResponse.GoogleApiResponse
+import com.jera.caracterisiticsv1.data.ApiResponse.GoogleApiResponse.GoogleApiResponse
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.asRequestBody
@@ -36,9 +36,9 @@ class CameraDataSourceImpl @Inject constructor( private val retrofitService: Ret
         return retrofitService.getModelPictures(
             url,
             query,
-            "AIzaSyDo2g-a8dUTC3ZcTZsoVMXMucFtRMPhpcw",
+            "AIzaSyA-GBteGYOUubH-nTWZrPsL_qLbWUsaZEY",
             5,
-            "608be117b629e4b7d",
+            "439a818a31a164abe",
             "image",
         )
     }

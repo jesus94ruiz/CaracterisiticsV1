@@ -2,7 +2,7 @@ package com.jera.caracterisiticsv1.repository
 
 import com.jera.caracterisiticsv1.data.ApiResponse.ApiResponse
 import com.jera.caracterisiticsv1.data.CameraDataSource
-import com.jera.caracterisiticsv1.data.GoogleApiResponse.GoogleApiResponse
+import com.jera.caracterisiticsv1.data.ApiResponse.GoogleApiResponse.GoogleApiResponse
 import com.jera.caracterisiticsv1.utilities.ResourceState
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch

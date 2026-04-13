@@ -1,4 +1,4 @@
-package com.jera.caracterisiticsv1.data.GoogleApiResponse
+package com.jera.caracterisiticsv1.data.ApiResponse.GoogleApiResponse
 
 data class SearchInformation(
     val formattedSearchTime: String,

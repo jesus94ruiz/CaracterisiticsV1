@@ -1,7 +1,7 @@
 package com.jera.caracterisiticsv1.data
 
 import com.jera.caracterisiticsv1.data.ApiResponse.ApiResponse
-import com.jera.caracterisiticsv1.data.GoogleApiResponse.GoogleApiResponse
+import com.jera.caracterisiticsv1.data.ApiResponse.GoogleApiResponse.GoogleApiResponse
 import okhttp3.MultipartBody
 import retrofit2.Response
 import retrofit2.http.*
@@ -9,7 +9,7 @@ import retrofit2.http.*
 interface RetrofitService {
 
     @Headers(
-        "api-key: 7a8b75f5-5c1b-4811-a6fa-f49284da7dcd"
+        "api-key: 2036319c-1733-4f46-95bd-ca42ef105043"
     )
     @Multipart
     @POST

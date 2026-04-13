@@ -1,7 +1,7 @@
 package com.jera.caracterisiticsv1.data
 
 import com.jera.caracterisiticsv1.data.ApiResponse.ApiResponse
-import com.jera.caracterisiticsv1.data.GoogleApiResponse.GoogleApiResponse
+import com.jera.caracterisiticsv1.data.ApiResponse.GoogleApiResponse.GoogleApiResponse
 import retrofit2.Response
 import java.io.File
 
