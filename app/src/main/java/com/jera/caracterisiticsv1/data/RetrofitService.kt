@@ -1,6 +1,7 @@
 package com.jera.caracterisiticsv1.data
 
 import com.jera.caracterisiticsv1.data.ApiResponse.ApiResponse
+import com.jera.caracterisiticsv1.data.ApiResponse.BraveApiResponse.BraveImageSearchResponse
 import com.jera.caracterisiticsv1.data.ApiResponse.GoogleApiResponse.GoogleApiResponse
 import okhttp3.MultipartBody
 import retrofit2.Response
@@ -35,4 +36,26 @@ interface RetrofitService {
         @Query("cx") SEARCH_ENGINE_ID: String,
         @Query("searchType") searchType: String,
     ): Response<GoogleApiResponse>
+
+    /**
+     * Brave Search API - Image Search
+     * Doc: https://brave.com/search/api/
+     *
+     * Endpoint típico:
+     *  GET https://api.search.brave.com/res/v1/images/search?q=...&count=5&search_lang=es&country=ES&spellcheck=1&safesearch=moderate
+     *
+     * Auth: Header "X-Subscription-Token: <token>"
+     *
+     * Nota: el header se añade automáticamente mediante OkHttp Interceptor (AppModule).
+     */
+    @GET
+    suspend fun braveImageSearch(
+        @Url url: String,
+        @Query("q") query: String,
+        @Query("count") count: Int,
+        @Query("search_lang") searchLang: String = "es",
+        @Query("country") country: String = "ES",
+        @Query("spellcheck") spellcheck: Int = 1,
+        @Query("safesearch") safesearch: String = "off",
+    ): Response<BraveImageSearchResponse>
 }

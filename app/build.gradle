@@ -17,6 +17,8 @@ android {
         versionCode 1
         versionName "1.0"
 
+        buildConfigField "String", "BRAVE_API_KEY", "\"BSA1GIvv5XeI4aS7D4vGfwx_aOMIbfO\""
+
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
             useSupportLibrary true
@@ -39,6 +41,7 @@ android {
     buildFeatures {
         compose true
         viewBinding true
+        buildConfig true
     }
     composeOptions {
         kotlinCompilerExtensionVersion '1.2.0'
@@ -109,6 +112,8 @@ dependencies {
 
     // Coil //
     implementation "io.coil-kt:coil-compose:2.0.0"
+    // Soporte SVG (muchas URLs de buscadores devuelven SVG/iconos o imágenes con content-type image/svg+xml)
+    implementation "io.coil-kt:coil-svg:2.0.0"
 
     // Room //
     implementation "androidx.room:room-runtime:2.5.0"

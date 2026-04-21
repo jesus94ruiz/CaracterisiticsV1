@@ -1,6 +1,10 @@
 *.iml
 .gradle
 /local.properties
+
+# Env files (secrets locales)
+.env
+.env.*
 /.idea/caches
 /.idea/libraries
 /.idea/modules.xml

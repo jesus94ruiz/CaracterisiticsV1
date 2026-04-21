@@ -1,6 +1,7 @@
 package com.jera.caracterisiticsv1.repository
 
 import com.jera.caracterisiticsv1.data.ApiResponse.ApiResponse
+import com.jera.caracterisiticsv1.data.ApiResponse.BraveApiResponse.BraveImageSearchResponse
 import com.jera.caracterisiticsv1.data.CameraDataSource
 import com.jera.caracterisiticsv1.data.ApiResponse.GoogleApiResponse.GoogleApiResponse
 import com.jera.caracterisiticsv1.utilities.ResourceState
@@ -42,6 +43,21 @@ class CameraRepository @Inject constructor( private val cameraDataSource: Camera
                 emit(ResourceState.Success(response.body()!!))
             } else {
                 emit( ResourceState.Error("Error fetching model pictures"))
+            }
+        }.catch { e -> emit(ResourceState.Error(e?.localizedMessage ?: "Error happened in flow")) }
+    }
+
+    suspend fun getModelPicturesBrave(query: String, count: Int = 5): Flow<ResourceState<BraveImageSearchResponse>> {
+        return flow {
+            emit(ResourceState.Loading())
+
+            val response = cameraDataSource.getModelPicturesBrave(query, count)
+            println(response)
+
+            if (response.isSuccessful && response.body() != null) {
+                emit(ResourceState.Success(response.body()!!))
+            } else {
+                emit(ResourceState.Error("Error fetching model pictures (brave)"))
             }
         }.catch { e -> emit(ResourceState.Error(e?.localizedMessage ?: "Error happened in flow")) }
     }

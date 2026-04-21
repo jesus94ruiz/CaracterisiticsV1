@@ -46,13 +46,29 @@ fun ImageCard(imageUrl: String) {
             .padding(8.dp)
             .size(300.dp, 169.dp)
     ) {
+        // IMPORTANTE:
+        // Brave (y otros buscadores) devuelven en "url" la página HTML, NO la imagen directa.
+        // Coil intenta decodificar ese HTML como imagen y Skia falla con:
+        // "Failed to create image decoder ... 'unimplemented'".
+        //
+        // Hay que pasar aquí la URL de la imagen directa (jpg/png/webp), típicamente:
+        // - Brave: result.properties.url (o thumbnail.src)
+        // - Google: item.link
+        //
+        // Como fallback defensivo, evitamos intentar cargar páginas HTML.
+        val isProbablyHtmlPage = imageUrl.startsWith("http") &&
+            (imageUrl.endsWith("/") || imageUrl.contains("/wallpapers/"))
+
         AsyncImage(
-            model = ImageRequest.Builder(LocalContext.current)
-                .data(imageUrl)
-                .size(Size.ORIGINAL)
-                .crossfade(true)
-                .build(),
-            //painter = rememberAsyncImagePainter(imageUrl),
+            model = if (isProbablyHtmlPage) {
+                null
+            } else {
+                ImageRequest.Builder(LocalContext.current)
+                    .data(imageUrl)
+                    .size(Size.ORIGINAL)
+                    .crossfade(true)
+                    .build()
+            },
             contentDescription = null,
             modifier = Modifier.fillMaxSize(),
             contentScale = ContentScale.FillWidth

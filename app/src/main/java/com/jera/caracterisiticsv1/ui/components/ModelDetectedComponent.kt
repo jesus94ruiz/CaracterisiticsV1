@@ -15,6 +15,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.jera.caracterisiticsv1.data.modelDetected.ModelDetected
 import com.jera.caracterisiticsv1.ui.theme.Poppins
+import com.jera.caracterisiticsv1.ui.components.BraveImageComponent
 
 @Composable
 fun ModelDetectedComponent(model: ModelDetected) {
@@ -51,7 +52,7 @@ fun ModelDetectedComponent(model: ModelDetected) {
             fontFamily = Poppins,
             fontSize = 24.sp
         )
-        GoogleImageComponent(imageUrls = model.searchedImages)
+        BraveImageComponent(thumbnailUrls = model.searchedImages)
         Text(text = probabilityText,
             modifier = Modifier.align(Alignment.CenterHorizontally),
             color = Color(0xE9, 0xEC, 0xEF, 0xFF),
@@ -83,5 +84,3 @@ fun previewModelDetectedComponent(){
     )
     ModelDetectedComponent(model = model)
 }*/
-
-

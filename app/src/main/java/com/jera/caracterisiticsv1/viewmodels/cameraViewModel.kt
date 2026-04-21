@@ -14,6 +14,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.jera.caracterisiticsv1.data.ApiResponse.ApiResponse
 import com.jera.caracterisiticsv1.data.ApiResponse.Detection
+import com.jera.caracterisiticsv1.BuildConfig
 import com.jera.caracterisiticsv1.data.ApiResponse.Meta
 import com.jera.caracterisiticsv1.data.ApiResponse.Parameters
 import com.jera.caracterisiticsv1.data.ApiResponse.GoogleApiResponse.GoogleApiResponse
@@ -162,27 +163,99 @@ class CameraViewModel @Inject constructor(
         )
     }
 
+    private fun pickFirstUniqueThumbnailUrl(
+        urlsAlreadyPicked: Set<String>,
+        results: List<com.jera.caracterisiticsv1.data.ApiResponse.BraveApiResponse.BraveImageResult>
+    ): String? {
+        return results
+            .asSequence()
+            .mapNotNull { it.thumbnail?.src }
+            .map { it.trim() }
+            .firstOrNull { it.isNotBlank() && !urlsAlreadyPicked.contains(it) }
+    }
+
     fun getModelPictures(model: ModelDetected) {
         println("--------GETMODELPICTURES-----------")
-        val query = "wallpaper" + " " + "${model.make_name}" + " " + "${model.model_name}" + " " + "${model.years}"
-        println(query)
+
+        val baseQuery = "${model.make_name} ${model.model_name} ${model.years}".trim()
+        if (baseQuery.isBlank()) {
+            _modelsDetected.value = ResourceState.Error("No se pudo construir la query del modelo")
+            return
+        }
+
+        if (BuildConfig.BRAVE_API_KEY.isBlank()) {
+            _modelPictures.value = ResourceState.Error(
+                "BRAVE_API_KEY no configurada. Añade tu token en app/build.gradle (buildConfigField BRAVE_API_KEY)."
+            )
+            _modelsDetected.value = ResourceState.Error(
+                "BRAVE_API_KEY no configurada.\nEl modelo detectado ha sido:\n$baseQuery"
+            )
+            return
+        }
+
+        // 5 vistas: 3/4 front, top, side, rear, interior
+        // Usamos 1 query por vista y nos quedamos con 1 imagen por cada una (primer resultado con thumbnail.src).
+        // Añadimos “16:9” a la query para favorecer resultados panorámicos que encajen con la Card 300x169.
+        // Brave no expone un filtro oficial de aspect ratio en este endpoint, así que esto es un sesgo vía texto.
+        val viewQueries: List<Pair<String, String>> = listOf(
+            "3/4 front view" to "$baseQuery 3/4 front view 16:9 wallpaper",
+            "top view" to "$baseQuery top view 16:9 wallpaper",
+            "side view" to "$baseQuery side view 16:9 wallpaper",
+            "rear view" to "$baseQuery rear view 16:9 wallpaper",
+            "interior" to "$baseQuery interior 16:9 wallpaper"
+        )
+
         viewModelScope.launch(Dispatchers.IO) {
-            cameraRepository.getModelPictures(query).collectLatest {
-                    googleApiResponse -> if (googleApiResponse is ResourceState.Success) {
-                        val responseData = googleApiResponse.data
-                        Log.d("CameraViewModel", "Response: ${responseData}")
-                        responseData.items.forEach { item -> model.searchedImages.add(item.link) }
-                        models.add(model)
-                        orderByProbability(models)
-                        _modelsDetected.value = ResourceState.Success(models)
-                        _modelPictures.value = googleApiResponse
-                        println(models)
-                    } else if (googleApiResponse is ResourceState.Error) {
-                        Log.e("CameraViewModel", "Error: ${googleApiResponse.error}")
-                        _modelPictures.value = ResourceState.Error("${googleApiResponse.error}")
-                        _modelsDetected.value = ResourceState.Error("${googleApiResponse.error}\n"  + "El modelo detectado ha sido: \n" + "${model.make_name}" + " " + "${model.model_name}" + " " + "${model.years}" )
+            try {
+                model.searchedImages.clear()
+
+                // Para evitar imágenes repetidas entre vistas, mantenemos un set de URLs ya elegidas.
+                val pickedUrls = linkedSetOf<String>()
+
+                for ((label, q) in viewQueries) {
+                    // Log/print explícito de la query para depuración
+                    Log.d("CameraViewModel", "Brave query [$label]: $q")
+                    println("Brave query [$label]: $q")
+
+                    // Intentamos hasta 3 veces (mismo query) si el primer resultado repite URL.
+                    // Cada intento incrementa el count para aumentar variedad de resultados.
+                    var chosenUrl: String? = null
+                    val maxAttempts = 3
+
+                    for (attempt in 0 until maxAttempts) {
+                        val count = 5 + attempt * 5
+
+                        cameraRepository.getModelPicturesBrave(q, count).collectLatest { braveResponse ->
+                            if (braveResponse is ResourceState.Success) {
+                                val responseData = braveResponse.data
+                                chosenUrl = pickFirstUniqueThumbnailUrl(pickedUrls, responseData.results)
+                            } else if (braveResponse is ResourceState.Error) {
+                                Log.e("CameraViewModel", "Brave error [$label]: ${braveResponse.error}")
+                            }
+                        }
+
+                        if (!chosenUrl.isNullOrBlank()) break
                     }
+
+                    val finalUrl = chosenUrl?.takeIf { it.isNotBlank() } ?: ""
+                    model.searchedImages.add(finalUrl)
+                    if (finalUrl.isNotBlank()) pickedUrls.add(finalUrl)
                 }
+
+                models.add(model)
+                orderByProbability(models)
+                _modelsDetected.value = ResourceState.Success(models)
+
+                // Para no tocar el resto de UI (que observa modelPictures), dejamos este state en NotInitialized.
+                _modelPictures.value = ResourceState.NotInitialized()
+
+                println(models)
+            } catch (e: Exception) {
+                Log.e("CameraViewModel", "Error building Brave view images", e)
+                _modelsDetected.value = ResourceState.Error(
+                    "Error buscando imágenes: ${e.message}\nEl modelo detectado ha sido:\n$baseQuery"
+                )
+            }
         }
     }
 

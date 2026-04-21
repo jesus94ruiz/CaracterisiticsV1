@@ -1,6 +1,8 @@
 package com.jera.caracterisiticsv1.data
 
+import com.jera.caracterisiticsv1.BuildConfig
 import com.jera.caracterisiticsv1.data.ApiResponse.ApiResponse
+import com.jera.caracterisiticsv1.data.ApiResponse.BraveApiResponse.BraveImageSearchResponse
 import com.jera.caracterisiticsv1.data.ApiResponse.GoogleApiResponse.GoogleApiResponse
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
@@ -40,6 +42,15 @@ class CameraDataSourceImpl @Inject constructor( private val retrofitService: Ret
             5,
             "439a818a31a164abe",
             "image",
+        )
+    }
+
+    override suspend fun getModelPicturesBrave(query: String, count: Int): Response<BraveImageSearchResponse> {
+        val url = "https://api.search.brave.com/res/v1/images/search"
+        return retrofitService.braveImageSearch(
+            url = url,
+            query = query,
+            count = count
         )
     }
 }
