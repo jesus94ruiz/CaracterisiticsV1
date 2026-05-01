@@ -93,6 +93,20 @@ fun MapScreen(
                 BottomNavigationItem(
                     icon = {
                         Image(
+                            painter = painterResource(id = R.drawable.gallery),
+                            contentDescription = "Galería",
+                            modifier = Modifier.size(24.dp),
+                            colorFilter = ColorFilter.tint(Color.Gray)
+                        )
+                    },
+                    selected = false,
+                    onClick = { navController.navigate(AppScreens.GalleryScreen.route) },
+                    selectedContentColor = Color(0xFFFF6B00),
+                    unselectedContentColor = Color.Gray
+                )
+                BottomNavigationItem(
+                    icon = {
+                        Image(
                             painter = painterResource(id = R.drawable.car_in_garage),
                             contentDescription = "Garaje",
                             modifier = Modifier.size(24.dp),

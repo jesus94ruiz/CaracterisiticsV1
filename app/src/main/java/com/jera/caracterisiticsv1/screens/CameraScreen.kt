@@ -123,7 +123,7 @@ private fun cameraContent(
         FloatingActionButton(
             onClick = {
                     navController.popBackStack();
-                    navController.navigate(AppScreens.MainScreen.route)
+                    navController.navigate(AppScreens.MapScreen.route)
             },
             modifier = Modifier
                 .align(Alignment.BottomEnd)
@@ -175,4 +175,3 @@ private fun requestPermission(onRequestPermission: () -> Unit) {
         }
     }
 }
-

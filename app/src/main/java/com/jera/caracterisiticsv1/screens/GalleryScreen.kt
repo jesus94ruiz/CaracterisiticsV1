@@ -19,12 +19,17 @@ import com.jera.caracterisiticsv1.ui.theme.Poppins
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.jera.caracterisiticsv1.R
+import com.jera.caracterisiticsv1.navigation.AppScreens
 import com.jera.caracterisiticsv1.ui.components.Analysing
 import com.jera.caracterisiticsv1.utilities.ResourceState
 import com.jera.caracterisiticsv1.viewmodels.CameraViewModel
@@ -54,7 +59,7 @@ fun GalleryScreen(navController: NavHostController, cameraViewModel: CameraViewM
                 )
             }
             }
-            GalleryContent(pickPhotoLauncher, selectedImageUri)
+            GalleryContent(pickPhotoLauncher, selectedImageUri, navController)
         }
         is ResourceState.Loading ->{
             Analysing()
@@ -73,6 +78,7 @@ fun GalleryScreen(navController: NavHostController, cameraViewModel: CameraViewM
 fun GalleryContent(
     pickPhotoLauncher: ManagedActivityResultLauncher<PickVisualMediaRequest, Uri?>,
     selectedImageUri: Uri?,
+    navController: NavHostController,
 ) {
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -131,6 +137,39 @@ fun GalleryContent(
                 Spacer(modifier = Modifier.height(36.dp))
                 ImageCard(selectedImageUri.toString())
                 confirmationButtons(pickPhotoLauncher, selectedImageUri!!)
+            }
+            Spacer(modifier = Modifier.height(24.dp))
+            Text(
+                text = "¿O volver al mapa?",
+                color = Color(0xE9, 0xEC, 0xEF, 0xFF),
+                fontFamily = Poppins,
+                fontSize = 14.sp,
+                textAlign = TextAlign.Center
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Button(
+                onClick = { navController.navigate(AppScreens.MapScreen.route) },
+                modifier = Modifier
+                    .padding(6.dp)
+                    .size(120.dp, 56.dp),
+                colors = ButtonDefaults.buttonColors(
+                    backgroundColor = Color(0xE9, 0xEC, 0xEF, 0xFF)
+                ),
+                shape = RoundedCornerShape(10)
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.home),
+                    contentDescription = "Mapa",
+                    modifier = Modifier.size(20.dp),
+                    colorFilter = ColorFilter.tint(Color(0x34, 0x3A, 0x40, 0xFF))
+                )
+                Spacer(modifier = Modifier.width(6.dp))
+                Text(
+                    text = "Mapa",
+                    color = Color(0x34, 0x3A, 0x40, 0xFF),
+                    fontSize = 14.sp,
+                    fontFamily = Poppins
+                )
             }
         }
     }

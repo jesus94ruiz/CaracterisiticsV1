@@ -132,19 +132,14 @@ fun ButtonRow(navController: NavHostController, model: ModelDetected, origin: St
             .padding(2.dp),
         horizontalArrangement = Arrangement.SpaceEvenly
     ) {
-        // Botón de Home
+        // Botón de Map
         SmallButtonWithIcon(
-            text = "Home",
-            icon = painterResource(id = R.drawable.home),
+            text = "Mapa",
+            icon = painterResource(id = R.drawable.map),
             onClick = {
-                if(origin == "camera"){
-                    navController.popBackStack();
-                    navController.navigate(AppScreens.MainScreen.route);
-                } else{
-                    navController.popBackStack();
-                    navController.navigate(AppScreens.MainScreen.route);
-                }
-                 cameraViewModel.resetResourceStates();
+                navController.popBackStack()
+                navController.navigate(AppScreens.MapScreen.route)
+                cameraViewModel.resetResourceStates()
             }
         )
 
@@ -262,11 +257,15 @@ fun NoResultsContent(
                 .padding(8.dp),
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
-            // Botón de Home
+            // Botón de Map
             SmallButtonWithIcon(
-                text = "Home",
+                text = "Mapa",
                 icon = painterResource(id = R.drawable.home),
-                onClick = { navController.navigate(AppScreens.MainScreen.route); cameraViewModel.resetResourceStates()}
+                onClick = {
+                    navController.popBackStack()
+                    navController.navigate(AppScreens.MapScreen.route)
+                    cameraViewModel.resetResourceStates()
+                }
             )
 
             // Botón de Repetir
