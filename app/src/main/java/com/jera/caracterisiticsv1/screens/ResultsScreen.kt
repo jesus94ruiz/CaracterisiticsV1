@@ -167,9 +167,14 @@ fun ButtonRow(navController: NavHostController, model: ModelDetected, origin: St
                 if(cameraViewModel.checkAndRequestPermissions(context, permissionsLauncher)){
                     cameraViewModel.saveFileToStorage(model.file, context)
                     cameraViewModel.insertModel(model)
+                    val originRoute = if (origin == "gallery") AppScreens.GalleryScreen.route
+                                      else AppScreens.CameraScreen.route
+                    navController.navigate(AppScreens.MapScreen.route) {
+                        popUpTo(originRoute) { inclusive = true }
+                    }
                     navController.navigate(AppScreens.GarageScreen.route)
+                    cameraViewModel.resetResourceStates()
                 }
-
             }
         )
     }
