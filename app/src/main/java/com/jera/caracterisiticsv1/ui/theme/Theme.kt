@@ -6,6 +6,21 @@ import androidx.compose.material.darkColors
 import androidx.compose.material.lightColors
 import androidx.compose.runtime.Composable
 
+private val TealFireColorPalette = darkColors(
+    primary = Amber,
+    primaryVariant = BurntOrange,
+    secondary = WarmSand,
+    secondaryVariant = SageMint,
+    background = DeepInk,
+    surface = DeepTeal,
+    error = BrickRed,
+    onPrimary = DeepInk,
+    onSecondary = DeepInk,
+    onBackground = WarmSand,
+    onSurface = WarmSand,
+    onError = WarmSand
+)
+
 private val DarkColorPalette = darkColors(
     primary = Purple200,
     primaryVariant = Purple700,
@@ -17,15 +32,6 @@ private val LightColorPalette = lightColors(
     primaryVariant = Purple700,
     secondary = Teal200,
     background = BackgroundColor
-
-    /* Other default colors to override
-    background = Color.White,
-    surface = Color.White,
-    onPrimary = Color.White,
-    onSecondary = Color.Black,
-    onBackground = Color.Black,
-    onSurface = Color.Black,
-    */
 )
 
 @Composable
@@ -33,11 +39,7 @@ fun CaracterisiticsV1Theme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     content: @Composable () -> Unit
 ) {
-    val colors = if (darkTheme) {
-        DarkColorPalette
-    } else {
-        LightColorPalette
-    }
+    val colors = TealFireColorPalette
 
     MaterialTheme(
         colors = colors,
