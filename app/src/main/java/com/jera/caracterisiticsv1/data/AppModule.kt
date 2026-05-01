@@ -25,28 +25,18 @@ object AppModule {
     @Provides
     fun provideRetrofit(): Retrofit {
 
-        val braveAuthInterceptor = Interceptor { chain ->
+        val carImagesAuthInterceptor = Interceptor { chain ->
             val request = chain.request()
-            val isBrave = request.url.host == "api.search.brave.com"
-            val token = BuildConfig.BRAVE_API_KEY
+            val isCarImages = request.url.host.contains("carimagesapi.com")
 
-            if (BuildConfig.DEBUG && isBrave) {
-                // No logueamos el token completo para no exponerlo en logcat
-                val masked = when {
-                    token.isEmpty() -> "<EMPTY>"
-                    token.length <= 6 -> "***"
-                    else -> token.take(3) + "..." + token.takeLast(3)
-                }
-                Log.d(
-                    "BraveAuth",
-                    "Applying token to host=${request.url.host} tokenLen=${token.length} tokenMasked=$masked"
-                )
-            }
-
-            val newRequest = if (isBrave) {
-                request.newBuilder()
-                    .header("X-Subscription-Token", token)
+            val newRequest = if (isCarImages) {
+                val newUrl = request.url.newBuilder()
+                    .addQueryParameter("api_key", BuildConfig.CAR_IMAGES_API_KEY)
                     .build()
+                if (BuildConfig.DEBUG) {
+                    Log.d("CarImagesAuth", "Applying api_key to ${request.url.host}")
+                }
+                request.newBuilder().url(newUrl).build()
             } else {
                 request
             }
@@ -63,7 +53,7 @@ object AppModule {
         }
 
         val okHttpClient = OkHttpClient.Builder()
-            .addInterceptor(braveAuthInterceptor)
+            .addInterceptor(carImagesAuthInterceptor)
             .addInterceptor(logging)
             .build()
 

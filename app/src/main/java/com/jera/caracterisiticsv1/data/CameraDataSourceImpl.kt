@@ -2,8 +2,7 @@ package com.jera.caracterisiticsv1.data
 
 import com.jera.caracterisiticsv1.BuildConfig
 import com.jera.caracterisiticsv1.data.ApiResponse.ApiResponse
-import com.jera.caracterisiticsv1.data.ApiResponse.BraveApiResponse.BraveImageSearchResponse
-import com.jera.caracterisiticsv1.data.ApiResponse.GoogleApiResponse.GoogleApiResponse
+import com.jera.caracterisiticsv1.data.ApiResponse.CarImagesApiResponse.CarImagesApiResponse
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.asRequestBody
@@ -11,13 +10,12 @@ import retrofit2.Response
 import java.io.File
 import javax.inject.Inject
 
-class CameraDataSourceImpl @Inject constructor( private val retrofitService: RetrofitService) : CameraDataSource{
+class CameraDataSourceImpl @Inject constructor(private val retrofitService: RetrofitService) : CameraDataSource {
 
     override suspend fun getModel(image: File): Response<ApiResponse> {
-
         val imageRequestBody = image.asRequestBody("application/octet-stream".toMediaTypeOrNull())
         val imageMultipart = MultipartBody.Part.createFormData("ImageToAnalise", image.name, imageRequestBody)
-        val features = arrayOf("mmg", "color", "angle");
+        val features = arrayOf("mmg", "color", "angle")
 
         return retrofitService.getModel(
             "https://api.carnet.ai/v2/mmg/detect",
@@ -33,24 +31,17 @@ class CameraDataSourceImpl @Inject constructor( private val retrofitService: Ret
         )
     }
 
-    override suspend fun getModelPictures(query: String): Response<GoogleApiResponse> {
-        val url = "https://customsearch.googleapis.com/customsearch/v1"
-        return retrofitService.getModelPictures(
-            url,
-            query,
-            "AIzaSyA-GBteGYOUubH-nTWZrPsL_qLbWUsaZEY",
-            5,
-            "439a818a31a164abe",
-            "image",
-        )
-    }
-
-    override suspend fun getModelPicturesBrave(query: String, count: Int): Response<BraveImageSearchResponse> {
-        val url = "https://api.search.brave.com/res/v1/images/search"
-        return retrofitService.braveImageSearch(
+    override suspend fun getCarImages(
+        make: String,
+        model: String,
+        year: String?
+    ): Response<CarImagesApiResponse> {
+        val url = "https://carimagesapi.com/api/v1/signed-url"
+        return retrofitService.getCarImages(
             url = url,
-            query = query,
-            count = count
+            make = make,
+            model = model,
+            year = year
         )
     }
 }

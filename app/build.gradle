@@ -17,7 +17,7 @@ android {
         versionCode 1
         versionName "1.0"
 
-        buildConfigField "String", "BRAVE_API_KEY", "\"BSA1GIvv5XeI4aS7D4vGfwx_aOMIbfO\""
+        buildConfigField "String", "CAR_IMAGES_API_KEY", "\"ci_355ac97ea63dd18cd41ef808a5f5e0d717736bf26744f5e285a1ef89\""
         buildConfigField "String", "GOOGLE_MAPS_API_KEY", "\"AIzaSyDU6XQJoRZPyfgp13pCGY4OeAzC3EYup4c\""
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"

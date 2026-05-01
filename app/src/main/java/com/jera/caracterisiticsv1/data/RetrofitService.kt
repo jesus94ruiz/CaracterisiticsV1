@@ -1,8 +1,7 @@
 package com.jera.caracterisiticsv1.data
 
 import com.jera.caracterisiticsv1.data.ApiResponse.ApiResponse
-import com.jera.caracterisiticsv1.data.ApiResponse.BraveApiResponse.BraveImageSearchResponse
-import com.jera.caracterisiticsv1.data.ApiResponse.GoogleApiResponse.GoogleApiResponse
+import com.jera.caracterisiticsv1.data.ApiResponse.CarImagesApiResponse.CarImagesApiResponse
 import okhttp3.MultipartBody
 import retrofit2.Response
 import retrofit2.http.*
@@ -27,35 +26,21 @@ interface RetrofitService {
         @Part image: MultipartBody.Part
     ): Response<ApiResponse>
 
-    @GET
-    suspend fun getModelPictures(
-        @Url url: String,
-        @Query("q") search_query: String,
-        @Query("key") API_KEY: String,
-        @Query("num") numberImages: Int,
-        @Query("cx") SEARCH_ENGINE_ID: String,
-        @Query("searchType") searchType: String,
-    ): Response<GoogleApiResponse>
-
     /**
-     * Brave Search API - Image Search
-     * Doc: https://brave.com/search/api/
+     * CarImagesAPI - Signed URL
+     * Doc: https://carimagesapi.com/docs#quickstart
      *
-     * Endpoint típico:
-     *  GET https://api.search.brave.com/res/v1/images/search?q=...&count=5&search_lang=es&country=ES&spellcheck=1&safesearch=moderate
+     * Endpoint:
+     *  GET https://carimagesapi.com/api/v1/signed-url?make=BMW&model=3+Series&year=2022&api_key=...
      *
-     * Auth: Header "X-Subscription-Token: <token>"
-     *
-     * Nota: el header se añade automáticamente mediante OkHttp Interceptor (AppModule).
+     * Respuesta: { "url": "https://carimagesapi.com/image?..." }
+     * Auth: Query param "api_key" añadido automáticamente via OkHttp Interceptor (AppModule).
      */
     @GET
-    suspend fun braveImageSearch(
+    suspend fun getCarImages(
         @Url url: String,
-        @Query("q") query: String,
-        @Query("count") count: Int,
-        @Query("search_lang") searchLang: String = "es",
-        @Query("country") country: String = "ES",
-        @Query("spellcheck") spellcheck: Int = 1,
-        @Query("safesearch") safesearch: String = "off",
-    ): Response<BraveImageSearchResponse>
+        @Query("make") make: String,
+        @Query("model") model: String,
+        @Query("year") year: String? = null,
+    ): Response<CarImagesApiResponse>
 }
