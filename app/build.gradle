@@ -18,6 +18,7 @@ android {
         versionName "1.0"
 
         buildConfigField "String", "BRAVE_API_KEY", "\"BSA1GIvv5XeI4aS7D4vGfwx_aOMIbfO\""
+        buildConfigField "String", "GOOGLE_MAPS_API_KEY", "\"AIzaSyDU6XQJoRZPyfgp13pCGY4OeAzC3EYup4c\""
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -59,6 +60,7 @@ dependencies {
     implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.3.1'
     implementation 'androidx.activity:activity-compose:1.6.1'
     implementation 'androidx.compose.material:material:1.2.0'
+    implementation "androidx.compose.material3:material3:1.0.1"
     implementation 'androidx.navigation:navigation-compose:2.5.3'
     implementation 'androidx.appcompat:appcompat:1.6.1'
     implementation 'androidx.appcompat:appcompat-resources:1.6.1'
@@ -86,6 +88,7 @@ dependencies {
     // Coroutines //
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.7.3"
 
     // CameraX //
     implementation "androidx.camera:camera-camera2:$camerax_version"
@@ -119,5 +122,10 @@ dependencies {
     implementation "androidx.room:room-runtime:2.5.0"
     kapt "androidx.room:room-compiler:2.5.0"
     implementation "androidx.room:room-ktx:2.5.0"
+
+    // Google Maps //
+    implementation "com.google.maps.android:maps-compose:2.11.4"
+    implementation "com.google.android.gms:play-services-maps:18.1.0"
+    implementation "com.google.android.gms:play-services-location:21.0.1"
 
 }

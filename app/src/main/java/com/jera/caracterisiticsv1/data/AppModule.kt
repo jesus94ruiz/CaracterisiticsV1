@@ -1,11 +1,14 @@
 package com.jera.caracterisiticsv1.data
 
 import android.util.Log
+import android.content.Context
 import com.jera.caracterisiticsv1.BuildConfig
 import com.jera.caracterisiticsv1.repository.CameraRepository
+import com.jera.caracterisiticsv1.repository.LocationRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
@@ -87,6 +90,12 @@ object AppModule {
     @Provides
     fun providesCameraRepository(cameraDataSource: CameraDataSource): CameraRepository{
         return CameraRepository(cameraDataSource)
+    }
+
+    @Singleton
+    @Provides
+    fun providesLocationRepository(@ApplicationContext context: Context): LocationRepository {
+        return LocationRepository(context)
     }
 
 }

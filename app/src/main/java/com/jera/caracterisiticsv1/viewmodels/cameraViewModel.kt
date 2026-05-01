@@ -42,12 +42,18 @@ import android.os.Build
 import androidx.compose.ui.platform.LocalContext
 import com.jera.caracterisiticsv1.data.modelDetected.toDatabase
 import com.jera.caracterisiticsv1.repository.DatabaseRepository
+import com.jera.caracterisiticsv1.repository.LocationRepository
 
 @HiltViewModel
 class CameraViewModel @Inject constructor(
     private val cameraRepository: CameraRepository,
-    private val databaseRepository: DatabaseRepository
+    private val databaseRepository: DatabaseRepository,
+    private val locationRepository: LocationRepository
 ) : ViewModel() {
+
+    private var currentLatitude: Double? = null
+    private var currentLongitude: Double? = null
+    private var currentTimestamp: Long? = null
 
     val _model: MutableStateFlow<ResourceState<ApiResponse>> =
         MutableStateFlow(ResourceState.NotInitialized())
@@ -144,23 +150,33 @@ class CameraViewModel @Inject constructor(
 
 
     fun takePicture(cameraController: LifecycleCameraController, executor: Executor) {
-        val file = File.createTempFile("imagentest", ".jpg")
-        val outputDirectory = ImageCapture.OutputFileOptions.Builder(file).build()
+        viewModelScope.launch {
+            // Capturar ubicación y timestamp antes de tomar la foto
+            val location = locationRepository.getCurrentLocation() 
+                ?: locationRepository.getLastKnownLocation()
+            
+            currentLatitude = location?.latitude
+            currentLongitude = location?.longitude
+            currentTimestamp = System.currentTimeMillis()
+            
+            val file = File.createTempFile("imagentest", ".jpg")
+            val outputDirectory = ImageCapture.OutputFileOptions.Builder(file).build()
 
-        cameraController.takePicture(
-            outputDirectory,
-            executor,
-            object : ImageCapture.OnImageSavedCallback {
-                override fun onImageSaved(outputFileResults: ImageCapture.OutputFileResults) {
-                    println(outputFileResults.savedUri.toString())
-                    getModel(file)
-                }
+            cameraController.takePicture(
+                outputDirectory,
+                executor,
+                object : ImageCapture.OnImageSavedCallback {
+                    override fun onImageSaved(outputFileResults: ImageCapture.OutputFileResults) {
+                        println(outputFileResults.savedUri.toString())
+                        getModel(file)
+                    }
 
-                override fun onError(exception: ImageCaptureException) {
-                    println("Error al guardar la imagen: ${exception.message}")
-                }
-            },
-        )
+                    override fun onError(exception: ImageCaptureException) {
+                        println("Error al guardar la imagen: ${exception.message}")
+                    }
+                },
+            )
+        }
     }
 
     private fun pickFirstUniqueThumbnailUrl(
@@ -391,8 +407,22 @@ class CameraViewModel @Inject constructor(
         return false
     }
 
-        fun insertModel(model: ModelDetected) {
-        viewModelScope.launch { databaseRepository.insertModel(model.toDatabase()) }
+    fun insertModel(model: ModelDetected) {
+        viewModelScope.launch {
+            val modelEntity = model.toDatabase()
+            
+            // Guardar la ubicación y timestamp si están disponibles
+            if (currentLatitude != null && currentLongitude != null) {
+                val updatedEntity = modelEntity.copy(
+                    latitude = currentLatitude,
+                    longitude = currentLongitude,
+                    captureTimestamp = currentTimestamp
+                )
+                databaseRepository.insertModel(updatedEntity)
+            } else {
+                databaseRepository.insertModel(modelEntity)
+            }
+        }
     }
 
 }

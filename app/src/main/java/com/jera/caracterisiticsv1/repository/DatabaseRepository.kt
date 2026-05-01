@@ -13,6 +13,10 @@ class DatabaseRepository @Inject constructor(private val modelEntityDao: ModelEn
         return response.map { it.toDomain() }
     }
 
+    suspend fun getModelEntitiesFromDatabase(): List<ModelEntity>{
+        return modelEntityDao.getAllModels()
+    }
+
     suspend fun insertModel(modelEntity: ModelEntity){
         modelEntityDao.insert(modelEntity)
     }

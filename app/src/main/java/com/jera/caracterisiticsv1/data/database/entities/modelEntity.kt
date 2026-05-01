@@ -14,8 +14,10 @@ data class ModelEntity(
     @ColumnInfo(name ="years") val years: String,
     @ColumnInfo(name ="probability") val probability: Double,
     val path: String,
+    @ColumnInfo(name ="latitude") val latitude: Double? = null,
+    @ColumnInfo(name ="longitude") val longitude: Double? = null,
+    @ColumnInfo(name ="captureTimestamp") val captureTimestamp: Long? = null
 )
 
 fun ModelDetected.toDatabase() = ModelEntity(make_name = make_name, model_name = model_name, years = years, probability = probability, path = file.absolutePath)
 fun CarModel.toDatabase() = ModelEntity(make_name = make_name, model_name = model_name, years = years, probability = probability, path = path)
-
