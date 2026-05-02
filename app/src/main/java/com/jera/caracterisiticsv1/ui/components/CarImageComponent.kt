@@ -1,19 +1,12 @@
 package com.jera.caracterisiticsv1.ui.components
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -21,10 +14,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import coil.compose.SubcomposeAsyncImage
 import coil.request.ImageRequest
+import com.jera.caracterisiticsv1.ui.theme.*
 
 /**
  * Componente que muestra un carrusel horizontal de imágenes del coche
@@ -42,12 +38,15 @@ fun CarImageComponent(
         Box(
             modifier = modifier
                 .fillMaxWidth()
-                .height(180.dp),
+                .height(180.dp)
+                .background(SurfaceColor),
             contentAlignment = Alignment.Center
         ) {
             Text(
                 text = "No hay imágenes disponibles",
-                style = MaterialTheme.typography.bodyMedium,
+                color = TextSecondary,
+                fontFamily = Poppins,
+                fontSize = 14.sp,
                 textAlign = TextAlign.Center
             )
         }
@@ -79,22 +78,30 @@ private fun CarImageItem(url: String) {
         modifier = Modifier
             .width(300.dp)
             .height(180.dp)
-            .clip(RoundedCornerShape(12.dp)),
+            .clip(RoundedCornerShape(8.dp))
+            .border(1.dp, AccentPrimary.copy(alpha = 0.5f), RoundedCornerShape(8.dp)),
         loading = {
             Box(
                 modifier = Modifier
                     .width(300.dp)
-                    .height(180.dp),
+                    .height(180.dp)
+                    .background(SurfaceColor),
                 contentAlignment = Alignment.Center
             ) {
-                CircularProgressIndicator(modifier = Modifier.size(32.dp))
+                CircularProgressIndicator(
+                    modifier = Modifier.size(32.dp),
+                    color = CyberYellow,
+                    strokeWidth = 2.dp
+                )
             }
         },
         error = {
             Box(
                 modifier = Modifier
                     .width(300.dp)
-                    .height(180.dp),
+                    .height(180.dp)
+                    .background(SurfaceColor)
+                    .border(1.dp, CyberRed.copy(alpha = 0.4f), RoundedCornerShape(8.dp)),
                 contentAlignment = Alignment.Center
             ) {
                 Column(
@@ -102,12 +109,16 @@ private fun CarImageItem(url: String) {
                     verticalArrangement = Arrangement.Center
                 ) {
                     Text(
-                        text = "⚠️",
-                        style = MaterialTheme.typography.headlineMedium
+                        text = "⚠",
+                        color = CyberRed,
+                        fontSize = 28.sp
                     )
                     Text(
                         text = "Imagen no disponible",
-                        style = MaterialTheme.typography.bodySmall,
+                        color = TextSecondary,
+                        fontFamily = Poppins,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 12.sp,
                         modifier = Modifier.padding(top = 4.dp)
                     )
                 }

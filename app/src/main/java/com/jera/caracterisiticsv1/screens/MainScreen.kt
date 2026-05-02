@@ -1,43 +1,40 @@
 package com.jera.caracterisiticsv1.screens
 
-import android.app.LauncherActivity
-import android.content.ActivityNotFoundException
-import android.content.Intent
-import android.net.Uri
-import android.provider.MediaStore
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.RectangleShape
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.app.ActivityCompat
 import androidx.navigation.NavHostController
-import com.jera.caracterisiticsv1.navigation.AppScreens
-import com.jera.caracterisiticsv1.ui.theme.Poppins
 import com.jera.caracterisiticsv1.R
+import com.jera.caracterisiticsv1.navigation.AppScreens
+import com.jera.caracterisiticsv1.ui.theme.*
 
+// ─── Colores usados en MainScreen ──────────────────────────────────────────
+// Fondo:              CyberDark    (#110015)
+// Botones fondo:      SurfaceColor (#1a0020)
+// Botones borde:      AccentPrimary (#ff7037) / CyberYellow (#fff04c)
+// Íconos/Texto:       CyberYellow  (#fff04c)
+// TopBar fondo:       SurfaceDark  (#0d000f)
+// TopBar título:      CyberYellow
+// ────────────────────────────────────────────────────────────────────────────
 
-//@Preview(showSystemUi = true, showBackground = true)
 @Composable
-fun MainScreen(navController: NavHostController){
+fun MainScreen(navController: NavHostController) {
     Surface(
-        modifier = Modifier.fillMaxHeight()
+        modifier = Modifier
+            .fillMaxHeight()
             .fillMaxSize(),
-        color = Color(0x34, 0x3A, 0x40, 0xFF)
+        color = CyberDark
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -46,11 +43,11 @@ fun MainScreen(navController: NavHostController){
             Header(navController)
             Spacer(Modifier.size(50.dp))
             ButtonCamera(navController)
-            Spacer(Modifier.size(30.dp))
+            Spacer(Modifier.size(20.dp))
             ButtonGallery(navController)
-            Spacer(Modifier.size(30.dp))
+            Spacer(Modifier.size(20.dp))
             ButtonGarage(navController)
-            Spacer(Modifier.size(30.dp))
+            Spacer(Modifier.size(20.dp))
             ButtonMap(navController)
         }
     }
@@ -58,161 +55,110 @@ fun MainScreen(navController: NavHostController){
 
 @Composable
 fun ButtonGallery(navController: NavHostController) {
-    Button(onClick = {
-        navController.navigate(AppScreens.GalleryScreen.route)
-    },
-        modifier = Modifier
-            .height(180.dp)
-            .width(180.dp)
-            .shadow(10.dp, shape = RectangleShape, spotColor = Color(0x00, 0x00, 0x00, 0xFF)),
-        colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xE9, 0xEC, 0xEF, 0xFF)),
-        shape = RoundedCornerShape(5),
-    ){
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-            Spacer(Modifier.size(10.dp))
-            Icon(
-                painter = painterResource(id = R.drawable.gallery),
-                contentDescription = null,
-                modifier = Modifier.size(80.dp, 80.dp),
-                tint = Color(0x34, 0x3A, 0x40, 0xFF)
-            )
-            Spacer(Modifier.size(ButtonDefaults.IconSpacing))
-            Text(text = "Galería",
-                modifier = Modifier.align(Alignment.CenterHorizontally),
-                fontSize = 26.sp ,
-                fontFamily = Poppins,
-                fontWeight = FontWeight.Normal,
-                color = Color(0x34, 0x3A, 0x40, 0xFF)
-            )
-        }
-    }
+    CyberMenuButton(
+        label = "Galería",
+        iconRes = R.drawable.gallery,
+        onClick = { navController.navigate(AppScreens.GalleryScreen.route) }
+    )
 }
 
 @Composable
 fun ButtonCamera(navController: NavHostController) {
-    Button(onClick = {
-        navController.navigate(AppScreens.CameraScreen.route)},
-        modifier = Modifier
-            .height(180.dp)
-            .width(180.dp)
-            .shadow(10.dp, shape = RectangleShape, spotColor = Color(0x00, 0x00, 0x00, 0xFF)),
-        colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xE9, 0xEC, 0xEF, 0xFF)),
-        shape = RoundedCornerShape(5),
-    ){
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-            Spacer(Modifier.size(10.dp))
-            Icon(
-                painter = painterResource(id = R.drawable.camera),
-                contentDescription = null,
-                modifier = Modifier.size(80.dp, 80.dp),
-                tint = Color(0x34, 0x3A, 0x40, 0xFF)
-            )
-            Spacer(Modifier.size(ButtonDefaults.IconSpacing))
-            Text(text = "Cámara",
-                modifier = Modifier.align(Alignment.CenterHorizontally),
-                fontSize = 26.sp ,
-                fontFamily = Poppins,
-                fontWeight = FontWeight.Normal,
-                color = Color(0x34, 0x3A, 0x40, 0xFF)
-            )
-        }
-    }
+    CyberMenuButton(
+        label = "Cámara",
+        iconRes = R.drawable.camera,
+        onClick = { navController.navigate(AppScreens.CameraScreen.route) }
+    )
 }
 
 @Composable
 fun ButtonGarage(navController: NavHostController) {
-    Button(onClick = { navController.navigate(AppScreens.GarageScreen.route) },
-        modifier = Modifier
-            .height(180.dp)
-            .width(180.dp)
-            .shadow(10.dp, shape = RectangleShape, spotColor = Color(0x00, 0x00, 0x00, 0xFF)),
-        colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xE9, 0xEC, 0xEF, 0xFF)),
-        shape = RoundedCornerShape(5),
-    ){
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-            Spacer(Modifier.size(10.dp))
-            Icon(
-                painter = painterResource(id = R.drawable.car_in_garage),
-                contentDescription = null,
-                modifier = Modifier.size(80.dp, 80.dp),
-                tint = Color(0x34, 0x3A, 0x40, 0xFF)
-            )
-            Spacer(Modifier.size(ButtonDefaults.IconSpacing))
-            Text(text = "Garaje",
-                modifier = Modifier.align(Alignment.CenterHorizontally),
-                fontSize = 26.sp ,
-                fontFamily = Poppins,
-                fontWeight = FontWeight.Normal,
-                color = Color(0x34, 0x3A, 0x40, 0xFF)
-            )
-        }
-    }
+    CyberMenuButton(
+        label = "Garaje",
+        iconRes = R.drawable.car_in_garage,
+        onClick = { navController.navigate(AppScreens.GarageScreen.route) }
+    )
 }
+
 @Composable
 fun ButtonMap(navController: NavHostController) {
-    Button(onClick = { navController.navigate(AppScreens.MapScreen.route) },
+    CyberMenuButton(
+        label = "Mapa",
+        iconRes = R.drawable.home,
+        onClick = { navController.navigate(AppScreens.MapScreen.route) }
+    )
+}
+
+/** Botón cuadrado con estilo cyberpunk para el menú principal. */
+@Composable
+private fun CyberMenuButton(
+    label: String,
+    iconRes: Int,
+    onClick: () -> Unit
+) {
+    Button(
+        onClick = onClick,
         modifier = Modifier
-            .height(180.dp)
-            .width(180.dp)
-            .shadow(10.dp, shape = RectangleShape, spotColor = Color(0x00, 0x00, 0x00, 0xFF)),
-        colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xE9, 0xEC, 0xEF, 0xFF)),
-        shape = RoundedCornerShape(5),
-    ){
+            .height(160.dp)
+            .width(160.dp)
+            .shadow(8.dp, shape = RectangleShape, spotColor = AccentPrimary)
+            .border(1.dp, AccentPrimary, RoundedCornerShape(8.dp)),
+        colors = ButtonDefaults.buttonColors(backgroundColor = SurfaceColor),
+        shape = RoundedCornerShape(8.dp),
+        elevation = ButtonDefaults.elevation(
+            defaultElevation = 6.dp,
+            pressedElevation = 12.dp
+        )
+    ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            Spacer(Modifier.size(10.dp))
             Icon(
-                painter = painterResource(id = R.drawable.home),
+                painter = painterResource(id = iconRes),
                 contentDescription = null,
-                modifier = Modifier.size(80.dp, 80.dp),
-                tint = Color(0x34, 0x3A, 0x40, 0xFF)
+                modifier = Modifier.size(64.dp),
+                tint = CyberYellow
             )
-            Spacer(Modifier.size(ButtonDefaults.IconSpacing))
-            Text(text = "Mapa",
+            Spacer(Modifier.size(8.dp))
+            Text(
+                text = label,
                 modifier = Modifier.align(Alignment.CenterHorizontally),
-                fontSize = 26.sp ,
+                fontSize = 18.sp,
                 fontFamily = Poppins,
-                fontWeight = FontWeight.Normal,
-                color = Color(0x34, 0x3A, 0x40, 0xFF)
+                fontWeight = FontWeight.Bold,
+                color = CyberYellow,
+                letterSpacing = 1.sp
             )
         }
     }
 }
 
 @Composable
-fun Header(navController: NavHostController){
+fun Header(navController: NavHostController) {
     TopAppBar(
-        backgroundColor = Color(0xE9, 0xEC, 0xEF, 0xFF),
-        elevation = 40.dp,
+        backgroundColor = SurfaceDark,
+        elevation = 0.dp,
         title = {
-            Text(text = "Caracteristics",
-                Modifier.padding(5.dp, 5.dp),
-                fontSize = 28.sp,
+            Text(
+                text = "COCHEMON",
+                modifier = Modifier.padding(4.dp, 4.dp),
+                fontSize = 22.sp,
                 fontFamily = Poppins,
                 fontWeight = FontWeight.Bold,
-                color = Color(0x34, 0x3A, 0x40, 0xFF)
+                color = CyberYellow,
+                letterSpacing = 4.sp
             )
         },
         actions = {
             IconButton(onClick = { navController.navigate(AppScreens.SettingsScreen.route) }) {
                 Icon(
                     painter = painterResource(id = R.drawable.settings),
-                    contentDescription = "Open settings",
-                    modifier = Modifier.size(30.dp, 30.dp),
-                    tint = Color(0x34, 0x3A, 0x40, 0xFF)
+                    contentDescription = "Ajustes",
+                    modifier = Modifier.size(28.dp),
+                    tint = CyberOrange
                 )
             }
-        },
+        }
     )
 }

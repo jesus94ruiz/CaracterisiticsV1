@@ -1,48 +1,41 @@
 package com.jera.caracterisiticsv1.ui.theme
 
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.darkColors
-import androidx.compose.material.lightColors
 import androidx.compose.runtime.Composable
 
-private val TealFireColorPalette = darkColors(
-    primary = Amber,
-    primaryVariant = BurntOrange,
-    secondary = WarmSand,
-    secondaryVariant = SageMint,
-    background = DeepInk,
-    surface = DeepTeal,
-    error = BrickRed,
-    onPrimary = DeepInk,
-    onSecondary = DeepInk,
-    onBackground = WarmSand,
-    onSurface = WarmSand,
-    onError = WarmSand
-)
+// ── Paleta de colores del tema Material ──────────────────────────────────────
+// primary          → CyberYellow   (#fff04c)  – accent principal
+// primaryVariant   → CyberOrangeDark (#ff7037) – variante / botones
+// secondary        → CyberGreen    (#b8d14b)  – accent especial
+// secondaryVariant → CyberAmber    (#ffc545)  – variante secundaria
+// background       → CyberBlack   (#110015)  – fondo general
+// surface          → SurfaceColor  (#1a0025)  – fondo de cards
+// error            → CyberRed      (#d15053)  – errores
+// ─────────────────────────────────────────────────────────────────────────────
 
-private val DarkColorPalette = darkColors(
-    primary = Purple200,
-    primaryVariant = Purple700,
-    secondary = Teal200
-)
-
-private val LightColorPalette = lightColors(
-    primary = Purple500,
-    primaryVariant = Purple700,
-    secondary = Teal200,
-    background = BackgroundColor
+private val CyberpunkDarkColorPalette = darkColors(
+    primary          = CyberYellow,
+    primaryVariant   = CyberOrangeDark,
+    secondary        = CyberGreen,
+    secondaryVariant = CyberAmber,
+    background       = CyberBlack,
+    surface          = SurfaceColor,
+    error            = CyberRed,
+    onPrimary        = CyberBlack,
+    onSecondary      = CyberBlack,
+    onBackground     = CyberWhite,
+    onSurface        = CyberWhite,
+    onError          = CyberWhite
 )
 
 @Composable
 fun CaracterisiticsV1Theme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
+    darkTheme: Boolean = true,
     content: @Composable () -> Unit
 ) {
-    val colors = TealFireColorPalette
-
     MaterialTheme(
-        colors = colors,
+        colors = CyberpunkDarkColorPalette,
         typography = Typography,
         shapes = Shapes,
         content = content

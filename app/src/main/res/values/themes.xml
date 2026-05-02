@@ -1,7 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Tema base: AppCompat (no requiere google/material) -->
+    <style name="Theme.CaracterisiticsV1" parent="Theme.AppCompat.Light.NoActionBar">
+        <!-- Colores principales AppCompat -->
+        <item name="colorPrimary">@color/cyber_yellow</item>
+        <item name="colorPrimaryDark">@color/cyber_black</item>
+        <item name="colorAccent">@color/cyber_orange_dark</item>
 
-    <style name="Theme.CaracterisiticsV1" parent="android:Theme.Material.Light.NoActionBar">
-        <item name="android:statusBarColor">@color/purple_700</item>
+        <!-- Background general -->
+        <item name="android:colorBackground">@color/background</item>
+
+        <!-- Barras del sistema -->
+        <item name="android:statusBarColor">@color/cyber_black</item>
+        <item name="android:navigationBarColor">@color/cyber_black</item>
+        <item name="android:windowLightStatusBar">false</item>
     </style>
 </resources>

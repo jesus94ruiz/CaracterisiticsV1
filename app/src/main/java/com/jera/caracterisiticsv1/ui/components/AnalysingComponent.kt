@@ -11,13 +11,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.jera.caracterisiticsv1.R
-import com.jera.caracterisiticsv1.ui.theme.Poppins
+import com.jera.caracterisiticsv1.ui.theme.*
+
 @Composable
 fun Analysing() {
     val infiniteTransition = rememberInfiniteTransition()
@@ -30,23 +31,26 @@ fun Analysing() {
     )
     Box(
         modifier = Modifier
-            .background(Color(0x13, 0x18, 0x20, 0xFF))
+            .background(BackgroundColor)
             .fillMaxSize(),
         contentAlignment = Alignment.Center
-    )
-    {
+    ) {
         Text(
-            text = "Analizando...",
-            color = Color(0xE9, 0xEC, 0xEF, 0xFF),
-            fontSize = 26.sp ,
+            text = "ANALIZANDO...",
+            color = CyberYellow,
+            fontSize = 26.sp,
             fontFamily = Poppins,
+            fontWeight = FontWeight.Bold,
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .padding(bottom = 64.dp)
-
         )
-        Image(painter = painterResource(id = R.drawable.splashscreenrueda) , contentDescription = "LogoRueda",
-            Modifier.graphicsLayer{
-                this.rotationZ = angle })
+        Image(
+            painter = painterResource(id = R.drawable.splashscreenrueda),
+            contentDescription = "LogoRueda",
+            modifier = Modifier.graphicsLayer {
+                this.rotationZ = angle
+            }
+        )
     }
 }

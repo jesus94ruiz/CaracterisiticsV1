@@ -1,12 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="purple_200">#FFBB86FC</color>
-    <color name="purple_500">#FF6200EE</color>
-    <color name="purple_700">#FF3700B3</color>
-    <color name="teal_200">#FF03DAC5</color>
-    <color name="teal_700">#FF018786</color>
+    <!-- Paleta Cyberpunk -->
+    <color name="cyber_white">#FFFFFF</color>
+    <color name="cyber_yellow">#FFF04C</color>
+    <color name="cyber_amber">#FFC545</color>
+    <color name="cyber_orange">#FF9B3E</color>
+    <color name="cyber_orange_dark">#FF7037</color>
+    <color name="cyber_red">#D15053</color>
+    <color name="cyber_magenta">#A3306F</color>
+    <color name="cyber_purple">#75108B</color>
+    <color name="cyber_black">#110015</color>
+    <color name="cyber_green">#B8D14B</color>
+
+    <!-- Alias semánticos -->
+    <color name="background">#110015</color>
+    <color name="surface">#1A0025</color>
+    <color name="surface_variant">#25003A</color>
+    <color name="text_primary">#FFFFFF</color>
+    <color name="text_secondary">#FFC545</color>
+    <color name="accent_primary">#FFF04C</color>
+    <color name="accent_secondary">#FF7037</color>
+    <color name="neon_green">#B8D14B</color>
+    <color name="error">#D15053</color>
+
+    <!-- Sistema Android -->
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
-    <color name="MainBlue">#343A40FF</color>
-    <color name="carWhite">#E9ECEFFF</color>
 </resources>

@@ -4,8 +4,8 @@ import android.Manifest
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.pager.PageSize
 import androidx.compose.foundation.pager.VerticalPager
@@ -16,7 +16,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.jera.caracterisiticsv1.viewmodels.CameraViewModel
@@ -25,105 +24,140 @@ import com.jera.caracterisiticsv1.data.modelDetected.ModelDetected
 import com.jera.caracterisiticsv1.ui.components.ModelDetectedComponent
 import com.jera.caracterisiticsv1.utilities.ResourceState
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
 import com.jera.caracterisiticsv1.R
 import com.jera.caracterisiticsv1.navigation.AppScreens
 import com.jera.caracterisiticsv1.ui.components.Analysing
-import com.jera.caracterisiticsv1.ui.theme.Poppins
+import com.jera.caracterisiticsv1.ui.theme.*
+
+// ─── Colores usados en ResultsScreen ───────────────────────────────────────
+// Fondo surface:      CyberDark    (#110015)
+// Textos principales: CyberYellow  (#fff04c)
+// Textos error:       NeonOrange   (#ff9b3e)
+// Botones fondo:      SurfaceColor (#1a0020)
+// Botones borde:      AccentPrimary (#ff7037)
+// Botón acción:       borde CyberYellow
+// Íconos tint:        AccentPrimary / CyberMagenta
+// ────────────────────────────────────────────────────────────────────────────
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun ResultsScreen(navController: NavHostController, origin: String, cameraViewModel: CameraViewModel = hiltViewModel()){
-
-    println("----------------------------------------RESULTS_SCREEN---------------------------------------------------------------------")
+fun ResultsScreen(
+    navController: NavHostController,
+    origin: String,
+    cameraViewModel: CameraViewModel = hiltViewModel()
+) {
     val modelsDetected by cameraViewModel.modelsDetected.collectAsState(ResourceState.NotInitialized())
-    var pageCount:Int = if (cameraViewModel.pageCount == 0) 1 else cameraViewModel.pageCount
+    val pageCount: Int = if (cameraViewModel.pageCount == 0) 1 else cameraViewModel.pageCount
     val pagerState = rememberPagerState(
         initialPage = 0,
         initialPageOffsetFraction = 0f
     )
+
     VerticalPager(
         state = pagerState,
         pageSize = PageSize.Fill,
         pageSpacing = 8.dp,
         pageCount = pageCount
-    ){ page: Int ->
-
+    ) { page: Int ->
         Surface(
             modifier = Modifier.fillMaxSize(),
-            color = Color(0x34, 0x3A, 0x40, 0xFF)
-        )
-        {
-            when(modelsDetected){
+            color = CyberDark
+        ) {
+            when (modelsDetected) {
                 is ResourceState.NotInitialized, is ResourceState.Loading -> Analysing()
-
-                is ResourceState.Success ->{
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                    if ((modelsDetected as ResourceState.Success).data.isNotEmpty() && (page <= pageCount ) )
-                        ResultsContent(
-                            model = (modelsDetected as ResourceState.Success).data[page],
-                            navController,
-                            origin
-                        )
-                    if(page < pageCount-1)
-                        moreResults()
+                is ResourceState.Success -> {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        if ((modelsDetected as ResourceState.Success).data.isNotEmpty() && page <= pageCount)
+                            ResultsContent(
+                                model = (modelsDetected as ResourceState.Success).data[page],
+                                navController,
+                                origin
+                            )
+                        if (page < pageCount - 1)
+                            moreResults()
                     }
                 }
-                is ResourceState.Error ->{
-                    NoResultsContent(error = (modelsDetected as ResourceState.Error).error, navController, origin)
-                    println("Error")
+                is ResourceState.Error -> {
+                    NoResultsContent(
+                        error = (modelsDetected as ResourceState.Error).error,
+                        navController,
+                        origin
+                    )
                 }
             }
         }
-
     }
-
 }
 
 @Composable
-fun ResultsContent(model: ModelDetected, navController: NavHostController, origin: String, cameraViewModel: CameraViewModel = hiltViewModel()) {
-
-    Column(modifier = Modifier.padding(36.dp, 36.dp)) {
-        Text(text = "¡Modelo encontrado!",
-            modifier = Modifier.align(Alignment.CenterHorizontally),
-            color = Color(0xE9, 0xEC, 0xEF, 0xFF),
-            fontFamily = Poppins,
-            fontSize = 24.sp
-        )
-        ModelDetectedComponent(model)
-        Spacer(modifier = Modifier.height(64.dp))
-        Text(text = "¿Que deseas hacer?",
+fun ResultsContent(
+    model: ModelDetected,
+    navController: NavHostController,
+    origin: String,
+    cameraViewModel: CameraViewModel = hiltViewModel()
+) {
+    Column(modifier = Modifier.padding(36.dp)) {
+        // Separador superior
+        Box(
             modifier = Modifier
-                .align(Alignment.CenterHorizontally),
-            color = Color(0xE9, 0xEC, 0xEF, 0xFF),
+                .fillMaxWidth()
+                .height(1.dp)
+                .background(AccentPrimary.copy(alpha = 0.4f))
+        )
+        Spacer(modifier = Modifier.height(12.dp))
+        Text(
+            text = "¡Modelo encontrado!",
+            modifier = Modifier.align(Alignment.CenterHorizontally),
+            color = CyberYellow,
             fontFamily = Poppins,
+            fontWeight = FontWeight.Bold,
             fontSize = 24.sp
         )
+        Spacer(modifier = Modifier.height(12.dp))
+        ModelDetectedComponent(model)
+        Spacer(modifier = Modifier.height(40.dp))
+        // Separador
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(1.dp)
+                .background(SurfaceLight)
+        )
+        Spacer(modifier = Modifier.height(12.dp))
+        Text(
+            text = "¿Qué deseas hacer?",
+            modifier = Modifier.align(Alignment.CenterHorizontally),
+            color = NeonAmber,
+            fontFamily = Poppins,
+            fontSize = 16.sp
+        )
+        Spacer(modifier = Modifier.height(12.dp))
         ButtonRow(navController, model, origin)
     }
 }
 
 @Composable
-fun ButtonRow(navController: NavHostController, model: ModelDetected, origin: String, cameraViewModel: CameraViewModel = hiltViewModel()) {
-
-    // Manejo de permisos para guardar imagen
+fun ButtonRow(
+    navController: NavHostController,
+    model: ModelDetected,
+    origin: String,
+    cameraViewModel: CameraViewModel = hiltViewModel()
+) {
     val context = LocalContext.current
     val permissionsGranted = remember { mutableStateOf(false) }
 
     val permissionsLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestMultiplePermissions()
     ) { permissions ->
-        permissionsGranted.value = permissions[Manifest.permission.WRITE_EXTERNAL_STORAGE] == true &&
-                permissions[Manifest.permission.READ_EXTERNAL_STORAGE] == true
+        permissionsGranted.value =
+            permissions[Manifest.permission.WRITE_EXTERNAL_STORAGE] == true &&
+            permissions[Manifest.permission.READ_EXTERNAL_STORAGE] == true
     }
 
     Row(
@@ -132,43 +166,41 @@ fun ButtonRow(navController: NavHostController, model: ModelDetected, origin: St
             .padding(2.dp),
         horizontalArrangement = Arrangement.SpaceEvenly
     ) {
-        // Botón de Map
-        SmallButtonWithIcon(
+        CyberActionButton(
             text = "Mapa",
             icon = painterResource(id = R.drawable.map),
+            borderColor = AccentPrimary,
             onClick = {
                 navController.popBackStack()
                 navController.navigate(AppScreens.MapScreen.route)
                 cameraViewModel.resetResourceStates()
             }
         )
-
-        // Botón de Repetir
-        SmallButtonWithIcon(
+        CyberActionButton(
             text = "Repetir",
             icon = painterResource(id = R.drawable.reload),
+            borderColor = NeonAmber,
             onClick = {
-                if(origin == "camera"){
-                    navController.popBackStack();
-                    navController.navigate(AppScreens.CameraScreen.route);
-                } else{
+                if (origin == "camera") {
                     navController.popBackStack()
-                    navController.navigate(AppScreens.GalleryScreen.route);
+                    navController.navigate(AppScreens.CameraScreen.route)
+                } else {
+                    navController.popBackStack()
+                    navController.navigate(AppScreens.GalleryScreen.route)
                 }
-                cameraViewModel.resetResourceStates();
+                cameraViewModel.resetResourceStates()
             }
         )
-
-        // Botón de Guardar
-        SmallButtonWithIcon(
+        CyberActionButton(
             text = "Guardar",
             icon = painterResource(id = R.drawable.car_in_garage),
+            borderColor = CyberYellow,
             onClick = {
-                if(cameraViewModel.checkAndRequestPermissions(context, permissionsLauncher)){
+                if (cameraViewModel.checkAndRequestPermissions(context, permissionsLauncher)) {
                     cameraViewModel.saveFileToStorage(model.file, context)
                     cameraViewModel.insertModel(model)
                     val originRoute = if (origin == "gallery") AppScreens.GalleryScreen.route
-                                      else AppScreens.CameraScreen.route
+                    else AppScreens.CameraScreen.route
                     navController.navigate(AppScreens.MapScreen.route) {
                         popUpTo(originRoute) { inclusive = true }
                     }
@@ -180,36 +212,52 @@ fun ButtonRow(navController: NavHostController, model: ModelDetected, origin: St
     }
 }
 
+/** Botón de acción con ícono estilo cyberpunk */
 @Composable
-fun SmallButtonWithIcon(text: String, icon: Painter, onClick: () -> Unit) {
+fun CyberActionButton(
+    text: String,
+    icon: Painter,
+    borderColor: androidx.compose.ui.graphics.Color = AccentPrimary,
+    onClick: () -> Unit
+) {
     Button(
         onClick = onClick,
         modifier = Modifier
-            .padding(6.dp)
-            .size(90.dp, 64.dp),
-        colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xE9, 0xEC, 0xEF, 0xFF)),
-        shape = RoundedCornerShape(10)
+            .padding(4.dp)
+            .size(90.dp, 68.dp)
+            .border(1.dp, borderColor, RoundedCornerShape(8.dp)),
+        colors = ButtonDefaults.buttonColors(backgroundColor = SurfaceColor),
+        shape = RoundedCornerShape(8.dp)
     ) {
         Column(
-            modifier= Modifier.fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally) {
+            modifier = Modifier.fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
             Icon(
                 painter = icon,
                 contentDescription = text,
-                modifier = Modifier.size(24.dp) ,
-                tint = Color(0x34, 0x3A, 0x40, 0xFF)
+                modifier = Modifier.size(24.dp),
+                tint = borderColor
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(
                 text = text,
-                color = Color(0x34, 0x3A, 0x40, 0xFF),
+                color = borderColor,
                 fontSize = 10.sp,
-                fontFamily = Poppins
+                fontFamily = Poppins,
+                fontWeight = FontWeight.Bold
             )
         }
     }
 }
-//@Preview(showBackground = true, backgroundColor = 0x343A40FF)
+
+// Alias para compatibilidad con llamadas anteriores
+@Composable
+fun SmallButtonWithIcon(text: String, icon: Painter, onClick: () -> Unit) {
+    CyberActionButton(text = text, icon = icon, onClick = onClick)
+}
+
 @Composable
 fun NoResultsContent(
     error: String,
@@ -217,70 +265,86 @@ fun NoResultsContent(
     origin: String,
     cameraViewModel: CameraViewModel = hiltViewModel()
 ) {
-
     Column(
-        modifier = Modifier.padding(48.dp, 48.dp),
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(48.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
     ) {
+        // Borde superior de error
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(2.dp)
+                .background(CyberRed)
+        )
+        Spacer(modifier = Modifier.height(16.dp))
         Text(
-            text = "Han ocurrido problemas al detectar el modelo",
+            text = "Error al detectar el modelo",
             modifier = Modifier.align(Alignment.CenterHorizontally),
-            color = Color(0xE9, 0xEC, 0xEF, 0xFF),
+            color = CyberYellow,
             fontFamily = Poppins,
-            fontSize = 18.sp,
+            fontWeight = FontWeight.Bold,
+            fontSize = 20.sp,
             textAlign = TextAlign.Center,
         )
         Spacer(modifier = Modifier.height(8.dp))
         Text(
             text = "Error: $error",
             modifier = Modifier.align(Alignment.CenterHorizontally),
-            color = Color(0xE9, 0xEC, 0xEF, 0xFF),
+            color = NeonOrange,
             fontFamily = Poppins,
             fontSize = 12.sp,
             textAlign = TextAlign.Center,
         )
-        Spacer(modifier = Modifier.height(32.dp))
+        Spacer(modifier = Modifier.height(24.dp))
         Icon(
             painter = painterResource(id = R.drawable.flat_tire),
             contentDescription = "NotFound",
-            modifier = Modifier.size(350.dp),
-            tint = Color(0xE9, 0xEC, 0xEF, 0xFF)
+            modifier = Modifier.size(280.dp),
+            tint = CyberMagenta
         )
-        Spacer(modifier = Modifier.height(32.dp))
-        Text(
-            text = "¿Que deseas hacer?",
+        Spacer(modifier = Modifier.height(24.dp))
+        Box(
             modifier = Modifier
-                .align(Alignment.CenterHorizontally),
-            color = Color(0xE9, 0xEC, 0xEF, 0xFF),
-            fontFamily = Poppins,
-            fontSize = 24.sp
+                .fillMaxWidth()
+                .height(1.dp)
+                .background(SurfaceLight)
         )
+        Spacer(modifier = Modifier.height(12.dp))
+        Text(
+            text = "¿Qué deseas hacer?",
+            modifier = Modifier.align(Alignment.CenterHorizontally),
+            color = NeonAmber,
+            fontFamily = Poppins,
+            fontSize = 16.sp
+        )
+        Spacer(modifier = Modifier.height(12.dp))
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(8.dp),
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
-            // Botón de Map
-            SmallButtonWithIcon(
+            CyberActionButton(
                 text = "Mapa",
                 icon = painterResource(id = R.drawable.home),
+                borderColor = AccentPrimary,
                 onClick = {
                     navController.popBackStack()
                     navController.navigate(AppScreens.MapScreen.route)
                     cameraViewModel.resetResourceStates()
                 }
             )
-
-            // Botón de Repetir
-            SmallButtonWithIcon(
+            CyberActionButton(
                 text = "Repetir",
                 icon = painterResource(id = R.drawable.reload),
+                borderColor = CyberYellow,
                 onClick = {
-                    if(origin == "camera"){
+                    if (origin == "camera") {
                         navController.popBackStack()
-                        navController.navigate(AppScreens.CameraScreen.route);
+                        navController.navigate(AppScreens.CameraScreen.route)
                     } else {
                         navController.popBackStack()
                         navController.navigate(AppScreens.GalleryScreen.route)
@@ -291,12 +355,14 @@ fun NoResultsContent(
         }
     }
 }
+
 @Composable
 fun moreResults() {
-    Column {
-        Text(text = "Otros modelos encontrados",
+    Column(modifier = Modifier.padding(bottom = 8.dp)) {
+        Text(
+            text = "Otros modelos encontrados",
             modifier = Modifier.align(Alignment.CenterHorizontally),
-            color = Color(0xE9, 0xEC, 0xEF, 0x80),
+            color = NeonAmber.copy(alpha = 0.6f),
             fontFamily = Poppins,
             fontSize = 12.sp,
             textAlign = TextAlign.Center,
@@ -304,33 +370,10 @@ fun moreResults() {
         Icon(
             imageVector = Icons.Default.ArrowDropDown,
             contentDescription = "Arrow Down",
-            tint = Color(0xE9, 0xEC, 0xEF, 0x80),
+            tint = AccentPrimary.copy(alpha = 0.6f),
             modifier = Modifier
                 .size(32.dp)
                 .align(Alignment.CenterHorizontally)
         )
     }
 }
-
-/*@Preview(showBackground = true, backgroundColor = 0x343A40FF)
-@Composable
-fun previewResultsContent(){
-    val model = ModelDetected( "Ferrari","F50", "1995-1997", 0.9653,
-        mutableListOf(
-            "https://upload.wikimedia.org/wikipedia/commons/a/a5/1999_Ferrari_F50.jpg",
-            "https://s1.cdn.autoevolution.com/images/gallery/FERRARI-F50-1067_49.jpg",
-            "https://static.wikia.nocookie.net/hypercarss/images/9/9b/5402EC17-CBF7-4EBE-8F40-1D3A148C3464.jpeg/revision/latest?cb=20180411122943",
-            "https://static0.topspeedimages.com/wordpress/wp-content/uploads/jpg/201309/ferrari-f50.jpg",
-            "https://www.ultimatecarpage.com/images/car/186/Ferrari-F50-67449.jpg"))
-    val model2 = ModelDetected("Ferrari", "F430", "2004-2009", 0.0345,
-        mutableListOf(
-            "https://upload.wikimedia.org/wikipedia/commons/1/17/Ferrari_F430_front_20080605.jpg",
-            "https://s1.cdn.autoevolution.com/images/gallery/FERRARI-F430-733_19.jpg",
-            "https://www.supercars.net/blog/wp-content/uploads/2016/04/2005_Ferrari_F43024.jpg",
-            "https://s1.cdn.autoevolution.com/images/gallery/FERRARI-F430-733_34.jpg",
-            "https://www.supercars.net/blog/wp-content/uploads/2016/04/2005_Ferrari_F43025.jpg"
-        )
-    )
-    val models = mutableListOf<ModelDetected>(model, model2)
-    ResultsContent(modelsDetected = models)
-}*/
