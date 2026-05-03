@@ -22,10 +22,15 @@ import com.jera.caracterisiticsv1.R
 import com.jera.caracterisiticsv1.ui.theme.*
 
 // ─── FloatingNavHub ───────────────────────────────────────────────────────────
-// Botón principal (cámara) rodeado de 3 satélites:
-//   • Galería  → arriba-derecha
-//   • Garaje   → centro-derecha
-//   • Ajustes  → abajo-izquierda
+// Botón principal (cámara) en la esquina inferior-derecha del hub.
+// Satélites posicionados alrededor del principal:
+//   • Garaje   → directamente encima
+//   • Galería  → diagonal arriba-izquierda
+//   • Ajustes  → a la izquierda
+//
+// Hub box: 200×200 dp
+// Main button center: (164, 164) — offset absoluteOffset(128, 128) para un botón de 72dp
+// Órbita: ~80 dp de distancia entre centros
 // ─────────────────────────────────────────────────────────────────────────────
 
 @Composable
@@ -37,36 +42,40 @@ fun FloatingNavHub(
     modifier: Modifier = Modifier
 ) {
     Box(
-        modifier = modifier.size(170.dp)
+        modifier = modifier.size(200.dp)
     ) {
-        // ── Galería (arriba-derecha) ──────────────────────────────────────
-        SatelliteButton(
-            iconRes = R.drawable.gallery,
-            label = "Galería",
-            onClick = onGalleryClick,
-            modifier = Modifier.align(Alignment.TopEnd)
-        )
-
-        // ── Garaje (centro-derecha) ───────────────────────────────────────
+        // ── Garaje: directamente encima del principal ─────────────────────
+        // Centro del satélite en (164, 84) → Column offset (142, 62)
         SatelliteButton(
             iconRes = R.drawable.car_in_garage,
             label = "Garaje",
             onClick = onGarageClick,
-            modifier = Modifier.align(Alignment.CenterEnd)
+            modifier = Modifier.absoluteOffset(x = 142.dp, y = 62.dp)
         )
 
-        // ── Ajustes (abajo-izquierda) ─────────────────────────────────────
+        // ── Galería: diagonal arriba-izquierda ────────────────────────────
+        // Centro del satélite en (108, 108) → Column offset (86, 86)
+        SatelliteButton(
+            iconRes = R.drawable.gallery,
+            label = "Galería",
+            onClick = onGalleryClick,
+            modifier = Modifier.absoluteOffset(x = 86.dp, y = 86.dp)
+        )
+
+        // ── Ajustes: a la izquierda del principal ─────────────────────────
+        // Centro del satélite en (84, 164) → Column offset (62, 142)
         SatelliteButton(
             iconRes = R.drawable.settings,
             label = "Ajustes",
             onClick = onSettingsClick,
-            modifier = Modifier.align(Alignment.BottomStart)
+            modifier = Modifier.absoluteOffset(x = 62.dp, y = 142.dp)
         )
 
         // ── Botón principal: Cámara (abajo-derecha) ───────────────────────
+        // Offset (128, 128) → botón de 72dp ocupa (128..200, 128..200)
         MainCameraButton(
             onClick = onCameraClick,
-            modifier = Modifier.align(Alignment.BottomEnd)
+            modifier = Modifier.absoluteOffset(x = 128.dp, y = 128.dp)
         )
     }
 }

@@ -5,19 +5,24 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.MapStyleOptions
 import com.google.maps.android.compose.*
@@ -30,6 +35,9 @@ import com.jera.caracterisiticsv1.ui.components.placeholderMissions
 import com.jera.caracterisiticsv1.ui.components.placeholderUser
 import com.jera.caracterisiticsv1.ui.theme.*
 import com.jera.caracterisiticsv1.viewmodels.MapViewModel
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.LocationOn
+import kotlinx.coroutines.launch
 
 @Composable
 fun MapScreen(
@@ -56,6 +64,25 @@ fun MapScreen(
     }
 
     var missionsExpanded by remember { mutableStateOf(false) }
+
+    // CameraPositionState hoisted para poder animar desde el botón de centrar
+    val cameraPositionState = rememberCameraPositionState {
+        position = CameraPosition.fromLatLngZoom(
+            uiState.currentLocation ?: com.google.android.gms.maps.model.LatLng(40.416775, -3.703790),
+            15f
+        )
+    }
+
+    // Actualizar la cámara cuando llegue la ubicación por primera vez
+    LaunchedEffect(uiState.currentLocation) {
+        uiState.currentLocation?.let { loc ->
+            cameraPositionState.animate(
+                CameraUpdateFactory.newLatLngZoom(loc, 15f)
+            )
+        }
+    }
+
+    val coroutineScope = rememberCoroutineScope()
 
     // ── Contenedor raíz — sin Scaffold, sin BottomBar ─────────────────────────
     Box(
@@ -89,9 +116,6 @@ fun MapScreen(
             }
 
             uiState.currentLocation != null -> {
-                val cameraPositionState = rememberCameraPositionState {
-                    position = CameraPosition.fromLatLngZoom(uiState.currentLocation!!, 15f)
-                }
                 GoogleMap(
                     modifier = Modifier.fillMaxSize(),
                     cameraPositionState = cameraPositionState,
@@ -102,12 +126,18 @@ fun MapScreen(
                         mapStyleOptions = MapStyleOptions(getCyberpunkMapStyle())
                     ),
                     uiSettings = MapUiSettings(
-                        myLocationButtonEnabled = true,
+                        myLocationButtonEnabled = false,   // usamos botón personalizado
                         zoomControlsEnabled = false,
                         compassEnabled = true,
                         mapToolbarEnabled = false,
                         tiltGesturesEnabled = false,
                         indoorLevelPickerEnabled = false
+                    ),
+                    // Empuja la marca de agua de Google hacia arriba,
+                    // dejándola justo encima del panel de misiones
+                    contentPadding = PaddingValues(
+                        start = 12.dp,
+                        bottom = 136.dp
                     )
                 ) {
                     viewModel.getCarsWithLocation().forEach { (location, car) ->
@@ -169,6 +199,35 @@ fun MapScreen(
             )
         }
 
+        // ── Debajo del MINI MAP: botón de centrar en mi ubicación ─────────────
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier
+                .align(Alignment.TopStart)
+                .padding(start = 16.dp, top = 108.dp)   // justo debajo del MINI MAP (~48+36+24)
+                .size(36.dp)
+                .shadow(elevation = 6.dp, shape = CircleShape)
+                .clip(CircleShape)
+                .background(CyberDark.copy(alpha = 0.90f))
+                .border(1.dp, AccentPrimary.copy(alpha = 0.7f), CircleShape)
+                .clickable {
+                    uiState.currentLocation?.let { loc ->
+                        coroutineScope.launch {
+                            cameraPositionState.animate(
+                                CameraUpdateFactory.newLatLngZoom(loc, 15f)
+                            )
+                        }
+                    }
+                }
+        ) {
+            Icon(
+                imageVector = Icons.Filled.LocationOn,
+                contentDescription = "Centrar mapa",
+                tint = CyberYellow,
+                modifier = Modifier.size(18.dp)
+            )
+        }
+
         // ── Arriba derecha: UserInfoPanel ─────────────────────────────────────
         UserInfoPanel(
             user = placeholderUser,
@@ -197,9 +256,9 @@ fun MapScreen(
 
         // ── Abajo derecha: FloatingNavHub ─────────────────────────────────────
         FloatingNavHub(
-            onCameraClick  = { navController.navigate(AppScreens.CameraScreen.route) },
-            onGarageClick  = { navController.navigate(AppScreens.GarageScreen.route) },
-            onGalleryClick = { navController.navigate(AppScreens.GalleryScreen.route) },
+            onCameraClick   = { navController.navigate(AppScreens.CameraScreen.route) },
+            onGarageClick   = { navController.navigate(AppScreens.GarageScreen.route) },
+            onGalleryClick  = { navController.navigate(AppScreens.GalleryScreen.route) },
             onSettingsClick = { navController.navigate(AppScreens.SettingsScreen.route) },
             modifier = Modifier
                 .align(Alignment.BottomEnd)
@@ -289,57 +348,25 @@ private fun getCyberpunkMapStyle(): String = """
   { "featureType": "road.arterial",
     "elementType": "geometry.stroke",
     "stylers": [{ "color": "#a3306f" }, { "weight": 1 }] },
-  { "featureType": "road.arterial",
-    "elementType": "labels.text.fill",
-    "stylers": [{ "color": "#ff9b3e" }] },
-
   { "featureType": "road.highway",
     "elementType": "geometry.fill",
-    "stylers": [{ "color": "#4d0060" }] },
+    "stylers": [{ "color": "#4a0070" }] },
   { "featureType": "road.highway",
     "elementType": "geometry.stroke",
-    "stylers": [{ "color": "#fff04c" }, { "weight": 1.5 }] },
-  { "featureType": "road.highway",
-    "elementType": "labels.text.fill",
-    "stylers": [{ "color": "#fff04c" }] },
-  { "featureType": "road.highway",
-    "elementType": "labels.text.stroke",
-    "stylers": [{ "color": "#110015" }] },
-
-  { "featureType": "road.highway.controlled_access",
-    "elementType": "geometry.fill",
-    "stylers": [{ "color": "#5a0070" }] },
-  { "featureType": "road.highway.controlled_access",
-    "elementType": "geometry.stroke",
-    "stylers": [{ "color": "#ff7037" }, { "weight": 2 }] },
-  { "featureType": "road.highway.controlled_access",
-    "elementType": "labels.text.fill",
-    "stylers": [{ "color": "#ff7037" }] },
+    "stylers": [{ "color": "#c040e0" }, { "weight": 1.5 }] },
 
   { "featureType": "transit",
     "elementType": "geometry",
-    "stylers": [{ "color": "#1a0020" }] },
-  { "featureType": "transit.line",
-    "elementType": "geometry.fill",
-    "stylers": [{ "color": "#75108b" }] },
-  { "featureType": "transit.line",
-    "elementType": "geometry.stroke",
-    "stylers": [{ "color": "#d15053" }, { "weight": 1 }] },
-  { "featureType": "transit.station",
-    "elementType": "geometry",
-    "stylers": [{ "color": "#2a0035" }] },
+    "stylers": [{ "color": "#1a0022" }] },
   { "featureType": "transit.station",
     "elementType": "labels.text.fill",
-    "stylers": [{ "color": "#ffc545" }] },
+    "stylers": [{ "color": "#c040e0" }] },
 
   { "featureType": "water",
     "elementType": "geometry",
-    "stylers": [{ "color": "#0d000f" }] },
-  { "featureType": "water",
-    "elementType": "geometry.fill",
-    "stylers": [{ "color": "#0d000f" }] },
+    "stylers": [{ "color": "#0a000f" }] },
   { "featureType": "water",
     "elementType": "labels.text.fill",
-    "stylers": [{ "color": "#75108b" }] }
+    "stylers": [{ "color": "#4a0070" }] }
 ]
-""".trimIndent()
+"""
