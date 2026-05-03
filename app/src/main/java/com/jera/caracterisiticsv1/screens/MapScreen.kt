@@ -3,22 +3,16 @@ package com.jera.caracterisiticsv1.screens
 import android.Manifest
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.BottomNavigation
-import androidx.compose.material.BottomNavigationItem
-import androidx.compose.material.Scaffold
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -27,19 +21,15 @@ import androidx.navigation.NavController
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.MapStyleOptions
 import com.google.maps.android.compose.*
-import com.jera.caracterisiticsv1.R
 import com.jera.caracterisiticsv1.navigation.AppScreens
+import com.jera.caracterisiticsv1.ui.components.FloatingNavHub
+import com.jera.caracterisiticsv1.ui.components.MissionsCompactCard
+import com.jera.caracterisiticsv1.ui.components.MissionsExpandedOverlay
+import com.jera.caracterisiticsv1.ui.components.UserInfoPanel
+import com.jera.caracterisiticsv1.ui.components.placeholderMissions
+import com.jera.caracterisiticsv1.ui.components.placeholderUser
 import com.jera.caracterisiticsv1.ui.theme.*
 import com.jera.caracterisiticsv1.viewmodels.MapViewModel
-
-// ─── Colores usados en MapScreen ─────────────────────────────────────────────
-// BottomNav fondo:          CyberDark     (#110015)
-// BottomNav ítem activo:    CyberYellow   (#fff04c)
-// BottomNav ítem inactivo:  SurfaceLight  (#4d3352)
-// Loading indicator:        AccentPrimary (#ff7037)
-// Borde overlay:            AccentPrimary (#ff7037) alpha
-// Mapa — estilo cyberpunk futurista (ver getMapStyle)
-// ─────────────────────────────────────────────────────────────────────────────
 
 @Composable
 fun MapScreen(
@@ -65,233 +55,160 @@ fun MapScreen(
         )
     }
 
-    Scaffold(
-        backgroundColor = CyberDark,
-        bottomBar = {
-            // ── BottomNav con estilo cyberpunk ──────────────────────────────
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(SurfaceColor)
-                    .border(
-                        width = 1.dp,
-                        color = AccentPrimary.copy(alpha = 0.5f),
-                        shape = RoundedCornerShape(topStart = 0.dp, topEnd = 0.dp)
-                    )
-            ) {
-                BottomNavigation(
-                    backgroundColor = SurfaceColor,
-                    contentColor = CyberYellow,
-                    elevation = 0.dp
+    var missionsExpanded by remember { mutableStateOf(false) }
+
+    // ── Contenedor raíz — sin Scaffold, sin BottomBar ─────────────────────────
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(CyberDark)
+    ) {
+
+        // ── Capa 1: Contenido principal (mapa / estado de carga) ──────────────
+        when {
+            uiState.isLoadingLocation -> {
+                Column(
+                    modifier = Modifier.align(Alignment.Center),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    // MAP (activo)
-                    BottomNavigationItem(
-                        icon = {
-                            Image(
-                                painter = painterResource(id = R.drawable.map),
-                                contentDescription = "Mapa",
-                                modifier = Modifier.size(24.dp),
-                                colorFilter = ColorFilter.tint(CyberYellow)
-                            )
-                        },
-                        selected = true,
-                        onClick = {},
-                        selectedContentColor = CyberYellow,
-                        unselectedContentColor = SurfaceLight
+                    CircularProgressIndicator(
+                        color = AccentPrimary,
+                        strokeWidth = 2.dp,
+                        modifier = Modifier.size(48.dp)
                     )
-                    // CAMERA
-                    BottomNavigationItem(
-                        icon = {
-                            Image(
-                                painter = painterResource(id = R.drawable.camera),
-                                contentDescription = "Camara",
-                                modifier = Modifier.size(24.dp),
-                                colorFilter = ColorFilter.tint(SurfaceLight)
-                            )
-                        },
-                        selected = false,
-                        onClick = { navController.navigate(AppScreens.CameraScreen.route) },
-                        selectedContentColor = CyberYellow,
-                        unselectedContentColor = SurfaceLight
+                    Text(
+                        text = "LOCALIZANDO...",
+                        color = CyberYellow,
+                        fontFamily = Poppins,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 13.sp,
+                        letterSpacing = 3.sp
                     )
-                    // GALLERY
-                    BottomNavigationItem(
-                        icon = {
-                            Image(
-                                painter = painterResource(id = R.drawable.gallery),
-                                contentDescription = "Galeria",
-                                modifier = Modifier.size(24.dp),
-                                colorFilter = ColorFilter.tint(SurfaceLight)
-                            )
-                        },
-                        selected = false,
-                        onClick = { navController.navigate(AppScreens.GalleryScreen.route) },
-                        selectedContentColor = CyberYellow,
-                        unselectedContentColor = SurfaceLight
+                }
+            }
+
+            uiState.currentLocation != null -> {
+                val cameraPositionState = rememberCameraPositionState {
+                    position = CameraPosition.fromLatLngZoom(uiState.currentLocation!!, 15f)
+                }
+                GoogleMap(
+                    modifier = Modifier.fillMaxSize(),
+                    cameraPositionState = cameraPositionState,
+                    properties = MapProperties(
+                        isMyLocationEnabled = uiState.hasLocationPermission,
+                        isBuildingEnabled = false,
+                        isIndoorEnabled = false,
+                        mapStyleOptions = MapStyleOptions(getCyberpunkMapStyle())
+                    ),
+                    uiSettings = MapUiSettings(
+                        myLocationButtonEnabled = true,
+                        zoomControlsEnabled = false,
+                        compassEnabled = true,
+                        mapToolbarEnabled = false,
+                        tiltGesturesEnabled = false,
+                        indoorLevelPickerEnabled = false
                     )
-                    // GARAGE
-                    BottomNavigationItem(
-                        icon = {
-                            Image(
-                                painter = painterResource(id = R.drawable.car_in_garage),
-                                contentDescription = "Garaje",
-                                modifier = Modifier.size(24.dp),
-                                colorFilter = ColorFilter.tint(SurfaceLight)
-                            )
-                        },
-                        selected = false,
-                        onClick = { navController.navigate(AppScreens.GarageScreen.route) },
-                        selectedContentColor = CyberYellow,
-                        unselectedContentColor = SurfaceLight
+                ) {
+                    viewModel.getCarsWithLocation().forEach { (location, car) ->
+                        Marker(
+                            state = MarkerState(position = location),
+                            title = "${car.make_name} ${car.model_name}",
+                            snippet = car.years
+                        )
+                    }
+                }
+            }
+
+            else -> {
+                Column(
+                    modifier = Modifier.align(Alignment.Center),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    CircularProgressIndicator(
+                        color = AccentPrimary,
+                        strokeWidth = 2.dp,
+                        modifier = Modifier.size(48.dp)
                     )
-                    // SETTINGS
-                    BottomNavigationItem(
-                        icon = {
-                            Image(
-                                painter = painterResource(id = R.drawable.settings),
-                                contentDescription = "Configuracion",
-                                modifier = Modifier.size(24.dp),
-                                colorFilter = ColorFilter.tint(SurfaceLight)
-                            )
-                        },
-                        selected = false,
-                        onClick = { navController.navigate(AppScreens.SettingsScreen.route) },
-                        selectedContentColor = CyberYellow,
-                        unselectedContentColor = SurfaceLight
+                    Text(
+                        text = "INICIALIZANDO GPS...",
+                        color = NeonAmber,
+                        fontFamily = Poppins,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 12.sp,
+                        letterSpacing = 2.sp
                     )
                 }
             }
         }
-    ) { paddingValues ->
+
+        // ── Capa 2: HUD superpuesto ───────────────────────────────────────────
+
+        // ── Arriba izquierda: etiqueta // MINI MAP ────────────────────────────
         Box(
             modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .background(CyberDark)
+                .align(Alignment.TopStart)
+                .padding(start = 12.dp, top = 48.dp)
+                .clip(RoundedCornerShape(6.dp))
+                .background(CyberDark.copy(alpha = 0.85f))
+                .border(
+                    1.dp,
+                    AccentPrimary.copy(alpha = 0.55f),
+                    RoundedCornerShape(6.dp)
+                )
+                .padding(horizontal = 12.dp, vertical = 8.dp)
         ) {
-            when {
-                uiState.isLoadingLocation -> {
-                    // Pantalla de carga estilo cyberpunk
-                    Column(
-                        modifier = Modifier.align(Alignment.Center),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.spacedBy(16.dp)
-                    ) {
-                        CircularProgressIndicator(
-                            color = AccentPrimary,
-                            strokeWidth = 2.dp,
-                            modifier = Modifier.size(48.dp)
-                        )
-                        Text(
-                            text = "LOCALIZANDO...",
-                            color = CyberYellow,
-                            fontFamily = Poppins,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 13.sp,
-                            letterSpacing = 3.sp
-                        )
-                    }
-                }
-
-                uiState.currentLocation != null -> {
-                    val cameraPositionState = rememberCameraPositionState {
-                        position = CameraPosition.fromLatLngZoom(uiState.currentLocation!!, 15f)
-                    }
-
-                    // Mapa con estilo cyberpunk
-                    GoogleMap(
-                        modifier = Modifier.fillMaxSize(),
-                        cameraPositionState = cameraPositionState,
-                        properties = MapProperties(
-                            isMyLocationEnabled = uiState.hasLocationPermission,
-                            isBuildingEnabled = false,
-                            isIndoorEnabled = false,
-                            mapStyleOptions = MapStyleOptions(getCyberpunkMapStyle())
-                        ),
-                        uiSettings = MapUiSettings(
-                            myLocationButtonEnabled = true,
-                            zoomControlsEnabled = false,
-                            compassEnabled = true,
-                            mapToolbarEnabled = false,
-                            tiltGesturesEnabled = false,
-                            indoorLevelPickerEnabled = false
-                        )
-                    ) {
-                        viewModel.getCarsWithLocation().forEach { (location, car) ->
-                            Marker(
-                                state = MarkerState(position = location),
-                                title = "${car.make_name} ${car.model_name}",
-                                snippet = car.years
-                            )
-                        }
-                    }
-
-                    // Overlay: etiqueta HUD en esquina superior izquierda
-                    Box(
-                        modifier = Modifier
-                            .align(Alignment.TopStart)
-                            .padding(12.dp)
-                            .clip(RoundedCornerShape(4.dp))
-                            .background(CyberDark.copy(alpha = 0.8f))
-                            .border(
-                                1.dp,
-                                AccentPrimary.copy(alpha = 0.6f),
-                                RoundedCornerShape(4.dp)
-                            )
-                            .padding(horizontal = 10.dp, vertical = 6.dp)
-                    ) {
-                        Text(
-                            text = "// MINI MAP",
-                            color = CyberYellow,
-                            fontFamily = Poppins,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 10.sp,
-                            letterSpacing = 2.sp
-                        )
-                    }
-                }
-
-                else -> {
-                    Column(
-                        modifier = Modifier.align(Alignment.Center),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.spacedBy(16.dp)
-                    ) {
-                        CircularProgressIndicator(
-                            color = AccentPrimary,
-                            strokeWidth = 2.dp,
-                            modifier = Modifier.size(48.dp)
-                        )
-                        Text(
-                            text = "INICIALIZANDO GPS...",
-                            color = NeonAmber,
-                            fontFamily = Poppins,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 12.sp,
-                            letterSpacing = 2.sp
-                        )
-                    }
-                }
-            }
+            Text(
+                text = "// MINI MAP",
+                color = CyberYellow,
+                fontFamily = Poppins,
+                fontWeight = FontWeight.Bold,
+                fontSize = 10.sp,
+                letterSpacing = 2.sp
+            )
         }
+
+        // ── Arriba derecha: UserInfoPanel ─────────────────────────────────────
+        UserInfoPanel(
+            user = placeholderUser,
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .padding(end = 12.dp, top = 48.dp)
+        )
+
+        // ── Abajo izquierda: MissionsCompactCard ──────────────────────────────
+        MissionsCompactCard(
+            missions = placeholderMissions,
+            onExpand = { missionsExpanded = true },
+            modifier = Modifier
+                .align(Alignment.BottomStart)
+                .padding(start = 12.dp, bottom = 24.dp)
+        )
+
+        // ── Overlay expandido de misiones (capa superior) ─────────────────────
+        if (missionsExpanded) {
+            MissionsExpandedOverlay(
+                missions = placeholderMissions,
+                onDismiss = { missionsExpanded = false },
+                modifier = Modifier.fillMaxSize()
+            )
+        }
+
+        // ── Abajo derecha: FloatingNavHub ─────────────────────────────────────
+        FloatingNavHub(
+            onCameraClick  = { navController.navigate(AppScreens.CameraScreen.route) },
+            onGarageClick  = { navController.navigate(AppScreens.GarageScreen.route) },
+            onGalleryClick = { navController.navigate(AppScreens.GalleryScreen.route) },
+            onSettingsClick = { navController.navigate(AppScreens.SettingsScreen.route) },
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(end = 16.dp, bottom = 24.dp)
+        )
     }
 }
 
 // ─── Estilo de mapa cyberpunk futurista ───────────────────────────────────────
-// Paleta de referencia:
-//   Fondo base:     #110015  (CyberDark)
-//   Superficie:     #1a0020  (SurfaceColor)
-//   Carreteras:     #ff7037  (AccentPrimary)   — neon orange
-//   Arteriales:     #a3306f  (NeonPurple)       — neon magenta
-//   Autopistas:     #fff04c  (CyberYellow)      — neon yellow
-//   Autopista stroke: #ff9b3e (AccentOrange)
-//   Labels:         #ffffff  (CyberWhite)
-//   Labels stroke:  #110015  (CyberDark)
-//   Agua:           #0d000f  (casi negro morado)
-//   Natural:        #150018  (oscuro morado)
-//   Man-made:       #1a0022
-//   Lime accent:    #b8d14b  (CyberLime) — usado en local roads
-// ─────────────────────────────────────────────────────────────────────────────
 private fun getCyberpunkMapStyle(): String = """
 [
   { "elementType": "geometry",
@@ -419,10 +336,10 @@ private fun getCyberpunkMapStyle(): String = """
     "elementType": "geometry",
     "stylers": [{ "color": "#0d000f" }] },
   { "featureType": "water",
-    "elementType": "geometry.stroke",
-    "stylers": [{ "color": "#75108b" }, { "weight": 1 }] },
+    "elementType": "geometry.fill",
+    "stylers": [{ "color": "#0d000f" }] },
   { "featureType": "water",
     "elementType": "labels.text.fill",
-    "stylers": [{ "color": "#a3306f" }] }
+    "stylers": [{ "color": "#75108b" }] }
 ]
 """.trimIndent()
