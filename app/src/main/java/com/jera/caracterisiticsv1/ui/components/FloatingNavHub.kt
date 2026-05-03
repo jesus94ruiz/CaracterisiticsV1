@@ -16,6 +16,8 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.jera.caracterisiticsv1.R
@@ -53,13 +55,13 @@ fun FloatingNavHub(
             modifier = Modifier.absoluteOffset(x = 142.dp, y = 62.dp)
         )
 
-        // ── Galería: diagonal arriba-izquierda ────────────────────────────
-        // Centro del satélite en (108, 108) → Column offset (86, 86)
+        // ── Galería: diagonal arriba-izquierda (ligeramente más arriba y a la derecha)
+        // Centro del satélite en (118, 94) → Column offset (96, 72)
         SatelliteButton(
             iconRes = R.drawable.gallery,
             label = "Galería",
             onClick = onGalleryClick,
-            modifier = Modifier.absoluteOffset(x = 86.dp, y = 86.dp)
+            modifier = Modifier.absoluteOffset(x = 88.dp, y = 80.dp)
         )
 
         // ── Ajustes: a la izquierda del principal ─────────────────────────

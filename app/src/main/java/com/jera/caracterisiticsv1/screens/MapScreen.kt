@@ -179,7 +179,7 @@ fun MapScreen(
         Box(
             modifier = Modifier
                 .align(Alignment.TopStart)
-                .padding(start = 12.dp, top = 48.dp)
+                .padding(start = 12.dp, top = 24.dp)
                 .clip(RoundedCornerShape(6.dp))
                 .background(CyberDark.copy(alpha = 0.85f))
                 .border(
@@ -204,7 +204,7 @@ fun MapScreen(
             contentAlignment = Alignment.Center,
             modifier = Modifier
                 .align(Alignment.TopStart)
-                .padding(start = 16.dp, top = 108.dp)   // justo debajo del MINI MAP (~48+36+24)
+                .padding(start = 16.dp, top = 84.dp)    // justo debajo del MINI MAP (~24+36+24)
                 .size(36.dp)
                 .shadow(elevation = 6.dp, shape = CircleShape)
                 .clip(CircleShape)
@@ -233,7 +233,7 @@ fun MapScreen(
             user = placeholderUser,
             modifier = Modifier
                 .align(Alignment.TopEnd)
-                .padding(end = 12.dp, top = 48.dp)
+                .padding(end = 12.dp, top = 24.dp)
         )
 
         // ── Abajo izquierda: MissionsCompactCard ──────────────────────────────
