@@ -245,15 +245,6 @@ fun MapScreen(
                 .padding(start = 12.dp, bottom = 24.dp)
         )
 
-        // ── Overlay expandido de misiones (capa superior) ─────────────────────
-        if (missionsExpanded) {
-            MissionsExpandedOverlay(
-                missions = placeholderMissions,
-                onDismiss = { missionsExpanded = false },
-                modifier = Modifier.fillMaxSize()
-            )
-        }
-
         // ── Abajo derecha: FloatingNavHub ─────────────────────────────────────
         FloatingNavHub(
             onCameraClick   = { navController.navigate(AppScreens.CameraScreen.route) },
@@ -264,6 +255,15 @@ fun MapScreen(
                 .align(Alignment.BottomEnd)
                 .padding(end = 16.dp, bottom = 24.dp)
         )
+
+        // ── Overlay expandido de misiones (capa superior — siempre al frente) ──
+        if (missionsExpanded) {
+            MissionsExpandedOverlay(
+                missions = placeholderMissions,
+                onDismiss = { missionsExpanded = false },
+                modifier = Modifier.fillMaxSize()
+            )
+        }
     }
 }
 
