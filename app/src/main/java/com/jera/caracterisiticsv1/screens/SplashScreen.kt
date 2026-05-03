@@ -52,34 +52,6 @@ fun Splash() {
         )
     }
 
-    // ── Flicker general (parpadeo suave) ─────────────────────────────────────
-    val flicker by infiniteTransition.animateFloat(
-        initialValue = 1f,
-        targetValue = 1f,
-        animationSpec = infiniteRepeatable(
-            animation = keyframes {
-                durationMillis = 3000
-                1.00f at 0
-                1.00f at 1200
-                0.55f at 1240
-                0.75f at 1270
-                0.60f at 1290
-                1.00f at 1320
-                1.00f at 1700
-                0.50f at 1730
-                0.80f at 1760
-                1.00f at 1790
-                1.00f at 2400
-                0.60f at 2430
-                0.70f at 2460
-                1.00f at 2490
-                1.00f at 3000
-            },
-            repeatMode = RepeatMode.Restart
-        ),
-        label = "flicker"
-    )
-
     // ── Desplazamiento X glitch del bloque principal ──────────────────────────
     val glitchX by infiniteTransition.animateFloat(
         initialValue = 0f,
@@ -110,20 +82,140 @@ fun Splash() {
         animationSpec = infiniteRepeatable(
             animation = keyframes {
                 durationMillis = 2500
-                0.1f   at 0
-                0.2f   at 900
+                0.1f  at 0
+                0.2f  at 900
                 0.75f at 950
-                0.6f at 980
-                0.3f   at 1010
-                0.2f   at 1600
-                0.8f at 1640
-                0.5f at 1670
-                0.3f   at 1700
-                0.1f   at 2500
+                0.6f  at 980
+                0.3f  at 1010
+                0.2f  at 1600
+                0.8f  at 1640
+                0.5f  at 1670
+                0.3f  at 1700
+                0.1f  at 2500
             },
             repeatMode = RepeatMode.Restart
         ),
         label = "ghost_alpha"
+    )
+
+    // ── Escala horizontal (stretch/squeeze de píxeles) ────────────────────────
+    val glitchScaleX by infiniteTransition.animateFloat(
+        initialValue = 1f,
+        targetValue = 1f,
+        animationSpec = infiniteRepeatable(
+            animation = keyframes {
+                durationMillis = 2500
+                1.00f at 0
+                1.00f at 900
+                1.09f at 930      // estira
+                0.93f at 960      // comprime
+                1.04f at 985
+                1.00f at 1010
+                1.00f at 1600
+                0.91f at 1630     // comprime
+                1.07f at 1660     // estira
+                1.00f at 1695
+                1.00f at 2500
+            },
+            repeatMode = RepeatMode.Restart
+        ),
+        label = "glitch_scaleX"
+    )
+
+    // ── Escala vertical (compresión de scanlines) ─────────────────────────────
+    val glitchScaleY by infiniteTransition.animateFloat(
+        initialValue = 1f,
+        targetValue = 1f,
+        animationSpec = infiniteRepeatable(
+            animation = keyframes {
+                durationMillis = 2500
+                1.00f at 0
+                1.00f at 900
+                0.96f at 940      // aplasta verticalmente
+                1.03f at 970
+                0.98f at 995
+                1.00f at 1020
+                1.00f at 1600
+                1.04f at 1635
+                0.95f at 1660
+                1.00f at 1695
+                1.00f at 2500
+            },
+            repeatMode = RepeatMode.Restart
+        ),
+        label = "glitch_scaleY"
+    )
+
+    // ── Cizalla (skewX) para los fantasmas — simula block tearing ────────────
+    val glitchSkew by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = 0f,
+        animationSpec = infiniteRepeatable(
+            animation = keyframes {
+                durationMillis = 4500
+                0.00f  at 0
+                0.00f  at 900
+                0.12f  at 940     // inclina derecha
+                -0.09f at 970     // inclina izquierda
+                0.05f  at 990
+                0.00f  at 1015
+                0.00f  at 1600
+                -0.11f at 1635
+                0.08f  at 1660
+                0.00f  at 1695
+                0.00f  at 2500
+            },
+            repeatMode = RepeatMode.Restart
+        ),
+        label = "glitch_skew"
+    )
+
+    // ── Desplazamiento Y independiente del ghost1 (franja superior) ───────────
+    val ghostY1 by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = 0f,
+        animationSpec = infiniteRepeatable(
+            animation = keyframes {
+                durationMillis = 4500
+                0f   at 0
+                0f   at 900
+                -12f at 940
+                6f   at 970
+                -4f  at 995
+                0f   at 1020
+                0f   at 1600
+                8f   at 1635
+                -6f  at 1660
+                0f   at 1695
+                0f   at 2500
+            },
+            repeatMode = RepeatMode.Restart
+        ),
+        label = "ghost_y1"
+    )
+
+    // ── Desplazamiento Y independiente del ghost2 (franja inferior) ──────────
+    val ghostY2 by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = 0f,
+        animationSpec = infiniteRepeatable(
+            animation = keyframes {
+                durationMillis = 2500
+                0f  at 0
+                0f  at 900
+                10f at 950
+                -7f at 975
+                3f  at 1000
+                0f  at 1025
+                0f  at 1600
+                -9f at 1640
+                5f  at 1665
+                0f  at 1700
+                0f  at 2500
+            },
+            repeatMode = RepeatMode.Restart
+        ),
+        label = "ghost_y2"
     )
 
     // ── Desplazamiento Y de scanlines (scroll lento hacia abajo) ─────────────
@@ -176,11 +268,11 @@ fun Splash() {
             }
         }
 
-        // ── Contenido central con fade-in + flicker ───────────────────────────
+        // ── Contenido central con fade-in ─────────────────────────────────────
         Column(
             modifier = Modifier
                 .graphicsLayer {
-                    alpha = fadeIn.value * flicker
+                    alpha = fadeIn.value
                     translationX = glitchX
                 },
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -210,7 +302,7 @@ fun Splash() {
             // ── Letra "C" gigante con capas de glitch ─────────────────────────
             Box(contentAlignment = Alignment.Center) {
 
-                // Ghost 1 — CyberMagenta desplazado a la derecha
+                // Ghost 1 — CyberMagenta: desplazado + skew + scaleX propio
                 Text(
                     text = "C",
                     color = CyberMagenta.copy(alpha = ghostAlpha),
@@ -220,11 +312,14 @@ fun Splash() {
                     letterSpacing = (-4).sp,
                     modifier = Modifier.graphicsLayer {
                         translationX = 10f
-                        translationY = -4f
+                        translationY = ghostY1
+                        scaleX = glitchScaleX * 1.06f
+                        scaleY = glitchScaleY
+                        rotationZ = glitchSkew * 2f
                     }
                 )
 
-                // Ghost 2 — CyberOrangeDark desplazado a la izquierda
+                // Ghost 2 — CyberOrangeDark: desplazado + skew inverso
                 Text(
                     text = "C",
                     color = CyberOrangeDark.copy(alpha = ghostAlpha * 0.85f),
@@ -234,18 +329,25 @@ fun Splash() {
                     letterSpacing = (-4).sp,
                     modifier = Modifier.graphicsLayer {
                         translationX = -10f
-                        translationY = 4f
+                        translationY = ghostY2
+                        scaleX = glitchScaleX * 0.94f
+                        scaleY = glitchScaleY
+                        rotationZ = -glitchSkew * 1.5f
                     }
                 )
 
-                // Capa principal — CyberYellow
+                // Capa principal — CyberYellow: deformación de píxeles
                 Text(
                     text = "C",
                     color = CyberYellow,
                     fontFamily = Poppins,
                     fontWeight = FontWeight.Bold,
                     fontSize = 190.sp,
-                    letterSpacing = (-4).sp
+                    letterSpacing = (-4).sp,
+                    modifier = Modifier.graphicsLayer {
+                        scaleX = glitchScaleX
+                        scaleY = glitchScaleY
+                    }
                 )
             }
 
@@ -254,7 +356,7 @@ fun Splash() {
             // ── Título "CARACTERISTICS" con glitch ────────────────────────────
             Box(contentAlignment = Alignment.Center) {
 
-                // Ghost 1 — CyberMagenta
+                // Ghost 1 — CyberMagenta: skew + desplazamiento Y
                 Text(
                     text = "CARACTERISTICS",
                     color = CyberMagenta.copy(alpha = ghostAlpha * 0.9f),
@@ -264,11 +366,13 @@ fun Splash() {
                     letterSpacing = 6.sp,
                     modifier = Modifier.graphicsLayer {
                         translationX = 8f
-                        translationY = -2f
+                        translationY = ghostY1 * 0.35f
+                        scaleX = glitchScaleX * 1.04f
+                        rotationZ = glitchSkew * 1.5f
                     }
                 )
 
-                // Ghost 2 — CyberOrangeDark
+                // Ghost 2 — CyberOrangeDark: skew inverso
                 Text(
                     text = "CARACTERISTICS",
                     color = CyberOrangeDark.copy(alpha = ghostAlpha * 0.75f),
@@ -278,18 +382,24 @@ fun Splash() {
                     letterSpacing = 6.sp,
                     modifier = Modifier.graphicsLayer {
                         translationX = -8f
-                        translationY = 2f
+                        translationY = ghostY2 * 0.35f
+                        scaleX = glitchScaleX * 0.96f
+                        rotationZ = -glitchSkew * 1.2f
                     }
                 )
 
-                // Texto principal — CyberAmber
+                // Texto principal — CyberAmber: stretch/squeeze
                 Text(
                     text = "CARACTERISTICS",
                     color = CyberAmber,
                     fontFamily = Poppins,
                     fontWeight = FontWeight.Bold,
                     fontSize = 22.sp,
-                    letterSpacing = 6.sp
+                    letterSpacing = 6.sp,
+                    modifier = Modifier.graphicsLayer {
+                        scaleX = glitchScaleX
+                        scaleY = glitchScaleY
+                    }
                 )
             }
 
