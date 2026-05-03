@@ -19,6 +19,7 @@ android {
 
         buildConfigField "String", "CAR_IMAGES_API_KEY", "\"ci_355ac97ea63dd18cd41ef808a5f5e0d717736bf26744f5e285a1ef89\""
         buildConfigField "String", "GOOGLE_MAPS_API_KEY", "\"AIzaSyDU6XQJoRZPyfgp13pCGY4OeAzC3EYup4c\""
+        buildConfigField "String", "CAR_SPECS_API_KEY", "\"6a4f929512msh203a632a9e882bep18049fjsn6ec5719af0d9\""
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {

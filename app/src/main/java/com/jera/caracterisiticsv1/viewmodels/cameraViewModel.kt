@@ -33,15 +33,21 @@ import java.util.concurrent.Executor
 import javax.inject.Inject
 import android.content.pm.PackageManager
 import android.os.Build
+import com.jera.caracterisiticsv1.data.AppModule
+import com.jera.caracterisiticsv1.data.ApplicationScope
 import com.jera.caracterisiticsv1.data.modelDetected.toDatabase
+import com.jera.caracterisiticsv1.repository.CarSpecsRepository
 import com.jera.caracterisiticsv1.repository.DatabaseRepository
 import com.jera.caracterisiticsv1.repository.LocationRepository
+import kotlinx.coroutines.CoroutineScope
 
 @HiltViewModel
 class CameraViewModel @Inject constructor(
     private val cameraRepository: CameraRepository,
     private val databaseRepository: DatabaseRepository,
-    private val locationRepository: LocationRepository
+    private val locationRepository: LocationRepository,
+    private val carSpecsRepository: CarSpecsRepository,
+    @ApplicationScope private val applicationScope: CoroutineScope
 ) : ViewModel() {
 
     private var currentLatitude: Double? = null
@@ -313,18 +319,46 @@ class CameraViewModel @Inject constructor(
     }
 
     fun insertModel(model: ModelDetected) {
-        viewModelScope.launch {
+        // Usamos applicationScope para que las llamadas de red no se cancelen
+        // si el ViewModel es destruido antes de que terminen
+        applicationScope.launch {
             val modelEntity = model.toDatabase()
 
-            if (currentLatitude != null && currentLongitude != null) {
-                val updatedEntity = modelEntity.copy(
+            val entityToInsert = if (currentLatitude != null && currentLongitude != null) {
+                modelEntity.copy(
                     latitude = currentLatitude,
                     longitude = currentLongitude,
                     captureTimestamp = currentTimestamp
                 )
-                databaseRepository.insertModel(updatedEntity)
             } else {
-                databaseRepository.insertModel(modelEntity)
+                modelEntity
+            }
+
+            val insertedId = databaseRepository.insertModel(entityToInsert)
+
+            // Obtener specs de CarSpecsAPI y persistirlas
+            val year = model.years
+                ?.split("-")
+                ?.firstOrNull()
+                ?.trim()
+                ?.toIntOrNull()
+
+            if (year != null) {
+                try {
+                    val specs = carSpecsRepository.fetchCarSpecs(
+                        makeName = model.make_name.trim(),
+                        modelName = model.model_name.trim(),
+                        year = year
+                    )
+                    if (specs != null) {
+                        databaseRepository.updateModelSpecs(insertedId.toInt(), specs)
+                        Log.d("CameraViewModel", "Specs guardadas para id=$insertedId")
+                    } else {
+                        Log.w("CameraViewModel", "No se encontraron specs para ${model.make_name} ${model.model_name} $year")
+                    }
+                } catch (e: Exception) {
+                    Log.e("CameraViewModel", "Error obteniendo specs", e)
+                }
             }
         }
     }
