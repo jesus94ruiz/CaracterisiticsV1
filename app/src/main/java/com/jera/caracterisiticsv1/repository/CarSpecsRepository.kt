@@ -54,6 +54,7 @@ class CarSpecsRepository @Inject constructor(
             // 5. Obtener specs del trim
             val detail = dataSource.getTrimDetail(trimId)
             if (detail == null) Log.w(TAG, "TrimDetail null for trimId=$trimId")
+            Log.d(TAG, "TrimDetail for trimId=$trimId, $detail")
             detail
 
         } catch (e: Exception) {

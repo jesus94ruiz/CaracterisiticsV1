@@ -83,7 +83,7 @@ fun GarageCard(model: CarModel) {
     var expanded by remember { mutableStateOf(false) }
     val hasSpecs = listOf(
         model.specsBodyType, model.specsPowerHp, model.specsEngineType,
-        model.specsFuelType, model.specsAcceleration0100, model.specsTopSpeedKmh
+        model.specsTorqueNm, model.specsAcceleration0100, model.specsTopSpeedKmh
     ).any { !it.isNullOrBlank() }
 
     Card(
@@ -206,14 +206,12 @@ fun GarageCard(model: CarModel) {
                             // Carrocería
                             SpecSectionTitle("CARROCERÍA")
                             SpecRow("Tipo", model.specsBodyType)
-                            SpecRow("Puertas", model.specsDoors)
                             SpecRow("Plazas", model.specsSeats)
 
                             // Motor
                             SpecSectionTitle("MOTOR")
                             SpecRow("Tipo motor", model.specsEngineType)
                             SpecRow("Cilindrada", model.specsDisplacementCm3, "cm³")
-                            SpecRow("Combustible", model.specsFuelType)
                             SpecRow("Cilindros", model.specsCylinders)
                             SpecRow("Potencia", model.specsPowerHp, "CV")
                             SpecRow("Par máx.", model.specsTorqueNm, "Nm")
@@ -224,7 +222,6 @@ fun GarageCard(model: CarModel) {
                             SpecRow("0-100 km/h", model.specsAcceleration0100, "s")
                             SpecRow("Vel. máx.", model.specsTopSpeedKmh, "km/h")
                             SpecRow("Consumo mixto", model.specsConsumptionMixed, "L/100km")
-                            SpecRow("Emisiones CO₂", model.specsCo2GKm, "g/km")
 
                             // Transmisión
                             SpecSectionTitle("TRANSMISIÓN")
@@ -284,11 +281,9 @@ fun PreviewGarageCard() {
         probability = 0.9996,
         path = "",
         specsBodyType = "Coupe",
-        specsDoors = "2",
         specsSeats = "4",
         specsEngineType = "Boxer",
         specsDisplacementCm3 = "2981",
-        specsFuelType = "Gasolina",
         specsCylinders = "6",
         specsPowerHp = "450",
         specsTorqueNm = "530",
@@ -296,7 +291,6 @@ fun PreviewGarageCard() {
         specsAcceleration0100 = "3.5",
         specsTopSpeedKmh = "308",
         specsConsumptionMixed = "9.0",
-        specsCo2GKm = "205",
         specsLengthMm = "4519",
         specsWidthMm = "1852",
         specsHeightMm = "1300",
