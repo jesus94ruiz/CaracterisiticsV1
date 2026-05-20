@@ -35,12 +35,42 @@ class GarageViewModel @Inject constructor(
     private val _brandSortOrder   = MutableStateFlow(GarageSortOrder.A_Z)
     val brandSortOrder: StateFlow<GarageSortOrder> = _brandSortOrder
 
-    // ── Car view state ────────────────────────────────────────────────────────
+    // ── Car view state (by brand) ─────────────────────────────────────────────
     private val _carSearchQuery = MutableStateFlow("")
     val carSearchQuery: StateFlow<String> = _carSearchQuery
 
     private val _carSortOrder = MutableStateFlow(CarSortOrder.NAME_AZ)
     val carSortOrder: StateFlow<CarSortOrder> = _carSortOrder
+
+    // ── All-cars view state ───────────────────────────────────────────────────
+    private val _allCarsSearchQuery = MutableStateFlow("")
+    val allCarsSearchQuery: StateFlow<String> = _allCarsSearchQuery
+
+    private val _allCarsSortOrder = MutableStateFlow(CarSortOrder.NAME_AZ)
+    val allCarsSortOrder: StateFlow<CarSortOrder> = _allCarsSortOrder
+
+    // ── Derived: all cars sorted ──────────────────────────────────────────────
+    val allCarsSorted: StateFlow<List<CarModel>> = combine(
+        _models, _allCarsSearchQuery, _allCarsSortOrder
+    ) { cars, query, sort ->
+        var list = cars.toList()
+        if (query.isNotBlank()) {
+            list = list.filter { car ->
+                car.model_name.contains(query, ignoreCase = true) ||
+                car.make_name.contains(query, ignoreCase = true)  ||
+                (car.specsBodyType?.contains(query, ignoreCase = true) == true) ||
+                (car.specsFuelType?.contains(query, ignoreCase = true) == true)
+            }
+        }
+        list = when (sort) {
+            CarSortOrder.NAME_AZ   -> list.sortedBy   { it.model_name.lowercase() }
+            CarSortOrder.NAME_ZA   -> list.sortedByDescending { it.model_name.lowercase() }
+            CarSortOrder.YEAR_DESC -> list.sortedByDescending { it.years }
+            CarSortOrder.YEAR_ASC  -> list.sortedBy   { it.years }
+            CarSortOrder.PROB_DESC -> list.sortedByDescending { it.probability }
+        }
+        list
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
     // ── Derived: brands list ──────────────────────────────────────────────────
     val brands: StateFlow<List<BrandInfo>> = combine(
@@ -122,4 +152,8 @@ class GarageViewModel @Inject constructor(
     // ── Car actions ───────────────────────────────────────────────────────────
     fun setCarSearchQuery(query: String) { _carSearchQuery.value = query }
     fun setCarSortOrder(order: CarSortOrder) { _carSortOrder.value = order }
+
+    // ── All-cars actions ──────────────────────────────────────────────────────
+    fun setAllCarsSearchQuery(query: String) { _allCarsSearchQuery.value = query }
+    fun setAllCarsSortOrder(order: CarSortOrder) { _allCarsSortOrder.value = order }
 }
