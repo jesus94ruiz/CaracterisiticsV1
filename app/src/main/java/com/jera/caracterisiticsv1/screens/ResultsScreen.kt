@@ -158,22 +158,25 @@ fun ButtonRow(
     // Cuando llega el XP (y estamos en modo "guardando") navegamos a CaptureRewardScreen
     LaunchedEffect(xpGainedEvent, isSaving) {
         if (isSaving && xpGainedEvent != null) {
-            val xp              = xpGainedEvent ?: 0
-            val leveledUp       = levelUpEvent != null
-            val newLevel        = levelUpEvent ?: 0
+            val xp            = xpGainedEvent ?: 0
+            val leveledUp     = levelUpEvent != null
+            val newLevel      = levelUpEvent ?: 0
             val achievementsCount = newAchievements.size
 
-            cameraViewModel.consumeXpGainedEvent()
-            cameraViewModel.consumeLevelUpEvent()
-            cameraViewModel.consumeAchievementsEvent()
-            cameraViewModel.resetResourceStates()
-            isSaving = false
-
+            // Navegamos PRIMERO: no cambiar keys (isSaving) antes de navigate()
+            // para evitar que Compose cancele este coroutine antes de navegar
             navController.navigate(
                 AppScreens.CaptureRewardScreen.createRoute(xp, leveledUp, newLevel, achievementsCount)
             ) {
                 popUpTo(AppScreens.MainScreen.route) { inclusive = false }
             }
+
+            // Solo DESPUÉS de navegar, limpiamos estados y keys
+            isSaving = false
+            cameraViewModel.consumeXpGainedEvent()
+            cameraViewModel.consumeLevelUpEvent()
+            cameraViewModel.consumeAchievementsEvent()
+            cameraViewModel.resetResourceStates()
         }
     }
 
@@ -182,8 +185,11 @@ fun ButtonRow(
         if (isSaving) {
             delay(10_000L)
             if (isSaving) {
-                cameraViewModel.resetResourceStates()
                 isSaving = false
+                cameraViewModel.consumeXpGainedEvent()
+                cameraViewModel.consumeLevelUpEvent()
+                cameraViewModel.consumeAchievementsEvent()
+                cameraViewModel.resetResourceStates()
                 navController.navigate(AppScreens.GarageScreen.route) {
                     popUpTo(AppScreens.MainScreen.route) { inclusive = false }
                 }

@@ -335,72 +335,79 @@ class CameraViewModel @Inject constructor(
         // Usamos applicationScope para que las llamadas de red no se cancelen
         // si el ViewModel es destruido antes de que terminen
         applicationScope.launch {
-            val modelEntity = model.toDatabase()
-
-            val entityToInsert = if (currentLatitude != null && currentLongitude != null) {
-                modelEntity.copy(
-                    latitude = currentLatitude,
-                    longitude = currentLongitude,
-                    captureTimestamp = currentTimestamp
-                )
-            } else {
-                modelEntity
-            }
-
-            val insertedId = databaseRepository.insertModel(entityToInsert)
-
-            // ── XP: determinar si es primera captura de este modelo ────────────
-            val allModels = databaseRepository.getModelEntitiesFromDatabase()
-            val sameModelCount = allModels.count {
-                it.make_name.equals(model.make_name, ignoreCase = true) &&
-                it.model_name.equals(model.model_name, ignoreCase = true)
-            }
-            val isFirstCapture = sameModelCount <= 1   // el recién insertado ya cuenta
-
-            val carsOfSameBrand = allModels.count {
-                it.make_name.equals(model.make_name, ignoreCase = true)
-            }
-
+            var insertedId: Long = -1L
             try {
+                val modelEntity = model.toDatabase()
+
+                val entityToInsert = if (currentLatitude != null && currentLongitude != null) {
+                    modelEntity.copy(
+                        latitude = currentLatitude,
+                        longitude = currentLongitude,
+                        captureTimestamp = currentTimestamp
+                    )
+                } else {
+                    modelEntity
+                }
+
+                insertedId = databaseRepository.insertModel(entityToInsert)
+
+                // ── XP: determinar si es primera captura de este modelo ────────────
+                val allModels = databaseRepository.getModelEntitiesFromDatabase()
+                val sameModelCount = allModels.count {
+                    it.make_name.equals(model.make_name, ignoreCase = true) &&
+                    it.model_name.equals(model.model_name, ignoreCase = true)
+                }
+                val isFirstCapture = sameModelCount <= 1   // el recién insertado ya cuenta
+
+                val carsOfSameBrand = allModels.count {
+                    it.make_name.equals(model.make_name, ignoreCase = true)
+                }
+
                 val result = userRepository.addXpForCapture(
                     probability = model.probability ?: 0.5,
                     isFirstCapture = isFirstCapture,
                     brandName = model.make_name,
                     carsOfSameBrand = carsOfSameBrand
                 )
-                _xpGainedEvent.value = result.xpGained
                 if (result.newAchievements.isNotEmpty()) {
                     _newAchievements.value = result.newAchievements
                 }
                 if (result.leveledUp) {
                     _levelUpEvent.value = result.newLevel
                 }
+                // Señalizar XP al final (siempre, incluso si es 0)
+                _xpGainedEvent.value = result.xpGained
+
             } catch (e: Exception) {
-                Log.e("CameraViewModel", "Error añadiendo XP", e)
+                Log.e("CameraViewModel", "Error en insertModel", e)
+                // Siempre señalizamos para desbloquear la UI (con 0 XP en caso de error)
+                _xpGainedEvent.value = 0
             }
 
-            // Obtener specs de CarSpecsAPI y persistirlas
-            val year = model.years
-                ?.split("-")
-                ?.firstOrNull()
-                ?.trim()
-                ?.toIntOrNull()
+            // Obtener specs de CarSpecsAPI y persistirlas (no bloquea la navegación)
+            if (insertedId > 0) {
+                val year = model.years
+                    ?.split("-")
+                    ?.firstOrNull()
+                    ?.trim()
+                    ?.toIntOrNull()
 
-            if (year != null) {
-                try {
-                    val specs = carSpecsRepository.fetchCarSpecs(
-                        makeName = model.make_name.trim(),
-                        modelName = model.model_name.trim(),
-                        year = year
-                    )
-                    if (specs != null) {
-                        databaseRepository.updateModelSpecs(insertedId.toInt(), specs)
-                        Log.d("CameraViewModel", "Specs guardadas para id=$insertedId")
-                    } else {
-                        Log.w("CameraViewModel", "No se encontraron specs para ${model.make_name} ${model.model_name} $year")
+                if (year != null) {
+                    try {
+                        val specs = carSpecsRepository.fetchCarSpecs(
+                            makeName = model.make_name.trim(),
+                            modelName = model.model_name.trim(),
+                            year = year
+                        )
+                        if (specs != null) {
+                            databaseRepository.updateModelSpecs(insertedId.toInt(), specs)
+                            Log.d("CameraViewModel", "Specs guardadas para id=$insertedId")
+                        } else {
+                            Log.w("CameraViewModel", "No se encontraron specs para ${model.make_name} ${model.model_name} $year")
+                        }
+                    } catch (e: Exception) {
+                        Log.e("CameraViewModel", "Error obteniendo specs", e)
                     }
-                } catch (e: Exception) {
-                    Log.e("CameraViewModel", "Error obteniendo specs", e)
                 }
             }
         }
