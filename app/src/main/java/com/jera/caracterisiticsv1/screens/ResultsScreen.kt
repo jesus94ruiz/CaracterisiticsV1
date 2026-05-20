@@ -1,8 +1,5 @@
 package com.jera.caracterisiticsv1.screens
 
-import android.Manifest
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -34,6 +31,7 @@ import com.jera.caracterisiticsv1.R
 import com.jera.caracterisiticsv1.navigation.AppScreens
 import com.jera.caracterisiticsv1.ui.components.Analysing
 import com.jera.caracterisiticsv1.ui.theme.*
+import kotlinx.coroutines.delay
 
 // ─── Colores usados en ResultsScreen ───────────────────────────────────────
 // Fondo surface:      CyberDark    (#110015)
@@ -150,14 +148,47 @@ fun ButtonRow(
     cameraViewModel: CameraViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
-    val permissionsGranted = remember { mutableStateOf(false) }
+    var isSaving by remember { mutableStateOf(false) }
 
-    val permissionsLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestMultiplePermissions()
-    ) { permissions ->
-        permissionsGranted.value =
-            permissions[Manifest.permission.WRITE_EXTERNAL_STORAGE] == true &&
-            permissions[Manifest.permission.READ_EXTERNAL_STORAGE] == true
+    // Observamos los eventos de XP / logros / nivel
+    val xpGainedEvent by cameraViewModel.xpGainedEvent.collectAsState()
+    val levelUpEvent  by cameraViewModel.levelUpEvent.collectAsState()
+    val newAchievements by cameraViewModel.newAchievements.collectAsState()
+
+    // Cuando llega el XP (y estamos en modo "guardando") navegamos a CaptureRewardScreen
+    LaunchedEffect(xpGainedEvent, isSaving) {
+        if (isSaving && xpGainedEvent != null) {
+            val xp              = xpGainedEvent ?: 0
+            val leveledUp       = levelUpEvent != null
+            val newLevel        = levelUpEvent ?: 0
+            val achievementsCount = newAchievements.size
+
+            cameraViewModel.consumeXpGainedEvent()
+            cameraViewModel.consumeLevelUpEvent()
+            cameraViewModel.consumeAchievementsEvent()
+            cameraViewModel.resetResourceStates()
+            isSaving = false
+
+            navController.navigate(
+                AppScreens.CaptureRewardScreen.createRoute(xp, leveledUp, newLevel, achievementsCount)
+            ) {
+                popUpTo(AppScreens.MainScreen.route) { inclusive = false }
+            }
+        }
+    }
+
+    // Timeout de seguridad: si en 10 s no llega XP, vamos directo al garaje
+    LaunchedEffect(isSaving) {
+        if (isSaving) {
+            delay(10_000L)
+            if (isSaving) {
+                cameraViewModel.resetResourceStates()
+                isSaving = false
+                navController.navigate(AppScreens.GarageScreen.route) {
+                    popUpTo(AppScreens.MainScreen.route) { inclusive = false }
+                }
+            }
+        }
     }
 
     Row(
@@ -192,20 +223,14 @@ fun ButtonRow(
             }
         )
         CyberActionButton(
-            text = "Guardar",
+            text = if (isSaving) "..." else "Guardar",
             icon = painterResource(id = R.drawable.car_in_garage),
             borderColor = CyberYellow,
             onClick = {
-                if (cameraViewModel.checkAndRequestPermissions(context, permissionsLauncher)) {
+                if (!isSaving) {
+                    isSaving = true
                     cameraViewModel.saveFileToStorage(model.file, context)
                     cameraViewModel.insertModel(model)
-                    val originRoute = if (origin == "gallery") AppScreens.GalleryScreen.route
-                    else AppScreens.CameraScreen.route
-                    navController.navigate(AppScreens.MapScreen.route) {
-                        popUpTo(originRoute) { inclusive = true }
-                    }
-                    navController.navigate(AppScreens.GarageScreen.route)
-                    cameraViewModel.resetResourceStates()
                 }
             }
         )

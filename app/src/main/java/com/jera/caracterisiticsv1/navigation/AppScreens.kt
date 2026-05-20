@@ -10,4 +10,8 @@ sealed class AppScreens(val route:String) {
     object GarageScreen: AppScreens("garage_screen")
     object MapScreen: AppScreens("map_screen")
     object ProfileScreen: AppScreens("profile_screen")
+    object CaptureRewardScreen: AppScreens("capture_reward/{xpGained}/{leveledUp}/{newLevel}/{achievementsCount}") {
+        fun createRoute(xpGained: Int, leveledUp: Boolean, newLevel: Int, achievementsCount: Int) =
+            "capture_reward/$xpGained/$leveledUp/$newLevel/$achievementsCount"
+    }
 }
