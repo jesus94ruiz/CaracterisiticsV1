@@ -1,6 +1,8 @@
 package com.jera.caracterisiticsv1.di
 
 import com.jera.caracterisiticsv1.data.database.ModelDatabase
+import com.jera.caracterisiticsv1.data.database.dao.AchievementDao
+import com.jera.caracterisiticsv1.data.database.dao.UserProfileDao
 import android.content.Context
 import androidx.room.Room
 import dagger.Module
@@ -28,4 +30,14 @@ class RoomModule {
     @Provides
     fun provideModelDao(database: ModelDatabase) =
         database.modelDetectedDao()
+
+    @Singleton
+    @Provides
+    fun provideUserProfileDao(database: ModelDatabase): UserProfileDao =
+        database.userProfileDao()
+
+    @Singleton
+    @Provides
+    fun provideAchievementDao(database: ModelDatabase): AchievementDao =
+        database.achievementDao()
 }

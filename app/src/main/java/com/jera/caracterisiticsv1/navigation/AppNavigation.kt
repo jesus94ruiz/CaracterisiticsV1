@@ -40,5 +40,8 @@ fun AppNavigation(){
         composable(AppScreens.MapScreen.route){
             MapScreen(navController)
         }
+        composable(AppScreens.ProfileScreen.route){
+            ProfileScreen(navController)
+        }
     }
 }

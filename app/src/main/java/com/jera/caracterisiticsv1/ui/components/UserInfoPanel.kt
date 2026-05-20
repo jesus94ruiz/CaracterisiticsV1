@@ -2,6 +2,7 @@ package com.jera.caracterisiticsv1.ui.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -44,6 +45,7 @@ val placeholderUser = UserInfo(
 @Composable
 fun UserInfoPanel(
     user: UserInfo = placeholderUser,
+    onClick: (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     val xpFraction = if (user.maxXp > 0) user.currentXp.toFloat() / user.maxXp else 0f
@@ -59,6 +61,7 @@ fun UserInfoPanel(
                 AccentPrimary.copy(alpha = 0.55f),
                 RoundedCornerShape(8.dp)
             )
+            .then(if (onClick != null) Modifier.clickable { onClick() } else Modifier)
             .padding(horizontal = 10.dp, vertical = 8.dp)
     ) {
         // ── Avatar circular ───────────────────────────────────────────────

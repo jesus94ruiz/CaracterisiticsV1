@@ -39,6 +39,8 @@ import com.jera.caracterisiticsv1.data.modelDetected.toDatabase
 import com.jera.caracterisiticsv1.repository.CarSpecsRepository
 import com.jera.caracterisiticsv1.repository.DatabaseRepository
 import com.jera.caracterisiticsv1.repository.LocationRepository
+import com.jera.caracterisiticsv1.repository.UserRepository
+import com.jera.caracterisiticsv1.data.database.entities.AchievementEntity
 import kotlinx.coroutines.CoroutineScope
 
 @HiltViewModel
@@ -47,6 +49,7 @@ class CameraViewModel @Inject constructor(
     private val databaseRepository: DatabaseRepository,
     private val locationRepository: LocationRepository,
     private val carSpecsRepository: CarSpecsRepository,
+    private val userRepository: UserRepository,
     @ApplicationScope private val applicationScope: CoroutineScope
 ) : ViewModel() {
 
@@ -67,6 +70,16 @@ class CameraViewModel @Inject constructor(
     val _modelsDetected: MutableStateFlow<ResourceState<MutableList<ModelDetected>>> =
         MutableStateFlow(ResourceState.Loading())
     val modelsDetected: StateFlow<ResourceState<MutableList<ModelDetected>>> = _modelsDetected
+
+    // ── XP / Level Up ─────────────────────────────────────────────────────────
+    private val _levelUpEvent = MutableStateFlow<Int?>(null)
+    val levelUpEvent: StateFlow<Int?> = _levelUpEvent
+
+    private val _newAchievements = MutableStateFlow<List<AchievementEntity>>(emptyList())
+    val newAchievements: StateFlow<List<AchievementEntity>> = _newAchievements
+
+    private val _xpGainedEvent = MutableStateFlow<Int?>(null)
+    val xpGainedEvent: StateFlow<Int?> = _xpGainedEvent
 
     val models: MutableList<ModelDetected> = mutableListOf()
 
@@ -336,6 +349,36 @@ class CameraViewModel @Inject constructor(
 
             val insertedId = databaseRepository.insertModel(entityToInsert)
 
+            // ── XP: determinar si es primera captura de este modelo ────────────
+            val allModels = databaseRepository.getModelEntitiesFromDatabase()
+            val sameModelCount = allModels.count {
+                it.make_name.equals(model.make_name, ignoreCase = true) &&
+                it.model_name.equals(model.model_name, ignoreCase = true)
+            }
+            val isFirstCapture = sameModelCount <= 1   // el recién insertado ya cuenta
+
+            val carsOfSameBrand = allModels.count {
+                it.make_name.equals(model.make_name, ignoreCase = true)
+            }
+
+            try {
+                val result = userRepository.addXpForCapture(
+                    probability = model.probability ?: 0.5,
+                    isFirstCapture = isFirstCapture,
+                    brandName = model.make_name,
+                    carsOfSameBrand = carsOfSameBrand
+                )
+                _xpGainedEvent.value = result.xpGained
+                if (result.newAchievements.isNotEmpty()) {
+                    _newAchievements.value = result.newAchievements
+                }
+                if (result.leveledUp) {
+                    _levelUpEvent.value = result.newLevel
+                }
+            } catch (e: Exception) {
+                Log.e("CameraViewModel", "Error añadiendo XP", e)
+            }
+
             // Obtener specs de CarSpecsAPI y persistirlas
             val year = model.years
                 ?.split("-")
@@ -362,4 +405,8 @@ class CameraViewModel @Inject constructor(
             }
         }
     }
+
+    fun consumeLevelUpEvent() { _levelUpEvent.value = null }
+    fun consumeXpGainedEvent() { _xpGainedEvent.value = null }
+    fun consumeAchievementsEvent() { _newAchievements.value = emptyList() }
 }

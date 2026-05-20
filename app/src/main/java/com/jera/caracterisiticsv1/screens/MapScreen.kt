@@ -27,14 +27,18 @@ import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.MapStyleOptions
 import com.google.maps.android.compose.*
 import com.jera.caracterisiticsv1.navigation.AppScreens
+import com.jera.caracterisiticsv1.ui.components.AchievementToast
 import com.jera.caracterisiticsv1.ui.components.FloatingNavHub
+import com.jera.caracterisiticsv1.ui.components.LevelUpOverlay
 import com.jera.caracterisiticsv1.ui.components.MissionsCompactCard
 import com.jera.caracterisiticsv1.ui.components.MissionsExpandedOverlay
+import com.jera.caracterisiticsv1.ui.components.UserInfo
 import com.jera.caracterisiticsv1.ui.components.UserInfoPanel
+import com.jera.caracterisiticsv1.ui.components.XpGainedToast
 import com.jera.caracterisiticsv1.ui.components.placeholderMissions
-import com.jera.caracterisiticsv1.ui.components.placeholderUser
 import com.jera.caracterisiticsv1.ui.theme.*
 import com.jera.caracterisiticsv1.viewmodels.MapViewModel
+import com.jera.caracterisiticsv1.viewmodels.ProfileViewModel
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.LocationOn
 import kotlinx.coroutines.launch
@@ -42,9 +46,21 @@ import kotlinx.coroutines.launch
 @Composable
 fun MapScreen(
     navController: NavController,
-    viewModel: MapViewModel = hiltViewModel()
+    viewModel: MapViewModel = hiltViewModel(),
+    profileViewModel: ProfileViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val profileState by profileViewModel.uiState.collectAsState()
+    val xpGainedEvent by profileViewModel.xpGainedEvent.collectAsState()
+    val levelUpEvent by profileViewModel.levelUpEvent.collectAsState()
+    val pendingAchievements by profileViewModel.pendingAchievements.collectAsState()
+
+    val userInfo = UserInfo(
+        name = profileState.profile.username,
+        level = profileState.profile.level,
+        currentXp = profileState.profile.currentXp,
+        maxXp = profileState.xpForNextLevel
+    )
 
     val locationPermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestMultiplePermissions()
@@ -230,7 +246,8 @@ fun MapScreen(
 
         // ── Arriba derecha: UserInfoPanel ─────────────────────────────────────
         UserInfoPanel(
-            user = placeholderUser,
+            user = userInfo,
+            onClick = { navController.navigate(AppScreens.ProfileScreen.route) },
             modifier = Modifier
                 .align(Alignment.TopEnd)
                 .padding(end = 12.dp, top = 24.dp)
@@ -256,12 +273,54 @@ fun MapScreen(
                 .padding(end = 16.dp, bottom = 24.dp)
         )
 
-        // ── Overlay expandido de misiones (capa superior — siempre al frente) ──
+        // ── Overlay expandido de misiones ─────────────────────────────────────
         if (missionsExpanded) {
             MissionsExpandedOverlay(
                 missions = placeholderMissions,
                 onDismiss = { missionsExpanded = false },
                 modifier = Modifier.fillMaxSize()
+            )
+        }
+
+        // ── Overlays de feedback XP (encima de todo) ──────────────────────────
+
+        // XP Toast — arriba centro
+        xpGainedEvent?.let { xp ->
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .align(Alignment.TopCenter)
+                    .padding(top = 80.dp)
+            ) {
+                XpGainedToast(
+                    xp = xp,
+                    onDismiss = { profileViewModel.consumeXpGainedEvent() }
+                )
+            }
+        }
+
+        // Achievement Toast — abajo centro (por encima del nav hub)
+        pendingAchievements.firstOrNull()?.let { ach ->
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .align(Alignment.BottomCenter)
+                    .padding(bottom = 110.dp)
+            ) {
+                AchievementToast(
+                    icon = ach.icon,
+                    title = ach.title,
+                    description = ach.description,
+                    onDismiss = { profileViewModel.consumeFirstAchievement() }
+                )
+            }
+        }
+
+        // Level Up Overlay — pantalla completa, máxima prioridad
+        levelUpEvent?.let { level ->
+            LevelUpOverlay(
+                newLevel = level,
+                onDismiss = { profileViewModel.consumeLevelUpEvent() }
             )
         }
     }
