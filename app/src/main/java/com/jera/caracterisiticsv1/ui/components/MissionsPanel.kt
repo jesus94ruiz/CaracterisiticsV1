@@ -1,6 +1,5 @@
 package com.jera.caracterisiticsv1.ui.components
 
-import androidx.compose.animation.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -19,55 +18,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.jera.caracterisiticsv1.data.database.entities.DailyMissionEntity
 import com.jera.caracterisiticsv1.ui.theme.*
 
-// ─── Modelo de datos: Misión ──────────────────────────────────────────────────
-data class Mission(
-    val id: String,
-    val title: String,
-    val description: String,
-    val progress: Int,       // 0–100
-    val isCompleted: Boolean = false
-)
-
-// ─── Placeholders ─────────────────────────────────────────────────────────────
-val placeholderMissions = listOf(
-    Mission(
-        id = "m1",
-        title = "Primer escáner",
-        description = "Escanea tu primer vehículo con la cámara.",
-        progress = 100,
-        isCompleted = true
-    ),
-    Mission(
-        id = "m2",
-        title = "Coleccionista novato",
-        description = "Añade 5 vehículos distintos a tu garaje.",
-        progress = 60
-    ),
-    Mission(
-        id = "m3",
-        title = "Explorador urbano",
-        description = "Detecta vehículos en 3 ciudades diferentes.",
-        progress = 33
-    ),
-    Mission(
-        id = "m4",
-        title = "Fotógrafo de lujo",
-        description = "Captura 10 vehículos de gama alta.",
-        progress = 10
-    )
-)
-
-// ─── MissionsPanel ────────────────────────────────────────────────────────────
-// • Colapsado: tarjeta compacta en la esquina inferior izquierda.
-// • Expandido: overlay grande semitransparente centrado en pantalla.
-//   El estado expandido se gestiona con hoisting en MapScreen.
-// ─────────────────────────────────────────────────────────────────────────────
-
+// ─── MissionsCompactCard ──────────────────────────────────────────────────────
+// Tarjeta compacta que aparece en la esquina del mapa
 @Composable
 fun MissionsCompactCard(
-    missions: List<Mission> = placeholderMissions,
+    missions: List<DailyMissionEntity>,
     onExpand: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -88,7 +46,7 @@ fun MissionsCompactCard(
             .padding(horizontal = 12.dp, vertical = 10.dp)
     ) {
         Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-            // Título
+            // Título y contador
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -110,7 +68,7 @@ fun MissionsCompactCard(
                     fontSize = 9.sp
                 )
             }
-            // Barra global
+            // Barra de progreso global
             LinearProgressIndicator(
                 progress = if (total > 0) completed.toFloat() / total else 0f,
                 modifier = Modifier
@@ -131,6 +89,16 @@ fun MissionsCompactCard(
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
+            } ?: run {
+                if (total > 0) {
+                    Text(
+                        text = "¡Todo completado!",
+                        color = NeonGreen,
+                        fontFamily = Poppins,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 8.sp
+                    )
+                }
             }
             // Hint de expansión
             Text(
@@ -145,25 +113,27 @@ fun MissionsCompactCard(
     }
 }
 
-// ─── Overlay expandido ────────────────────────────────────────────────────────
+// ─── MissionsExpandedOverlay ──────────────────────────────────────────────────
 @Composable
 fun MissionsExpandedOverlay(
-    missions: List<Mission> = placeholderMissions,
+    missions: List<DailyMissionEntity>,
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val totalXp = missions.sumOf { it.xpReward }
+    val earnedXp = missions.filter { it.isCompleted }.sumOf { it.xpReward }
+
     Box(
         contentAlignment = Alignment.Center,
         modifier = modifier
             .fillMaxSize()
             .background(CyberDark.copy(alpha = 0.75f))
-            .clickable { onDismiss() }   // tap fuera para cerrar
+            .clickable { onDismiss() }
     ) {
-        // Contenedor central — evita que el click se propague
         Box(
             modifier = Modifier
                 .fillMaxWidth(0.88f)
-                .fillMaxHeight(0.72f)
+                .fillMaxHeight(0.75f)
                 .clip(RoundedCornerShape(16.dp))
                 .background(
                     brush = Brush.verticalGradient(
@@ -178,7 +148,7 @@ fun MissionsExpandedOverlay(
                     AccentPrimary.copy(alpha = 0.7f),
                     RoundedCornerShape(16.dp)
                 )
-                .clickable(enabled = false) {}   // consume clicks internos
+                .clickable(enabled = false) {}
                 .padding(20.dp)
         ) {
             Column(modifier = Modifier.fillMaxSize()) {
@@ -188,14 +158,23 @@ fun MissionsExpandedOverlay(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text(
-                        text = "// MISIONES & OBJETIVOS",
-                        color = CyberYellow,
-                        fontFamily = Poppins,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 13.sp,
-                        letterSpacing = 2.sp
-                    )
+                    Column {
+                        Text(
+                            text = "// MISIONES DIARIAS",
+                            color = CyberYellow,
+                            fontFamily = Poppins,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 13.sp,
+                            letterSpacing = 2.sp
+                        )
+                        Text(
+                            text = "XP disponible: $earnedXp / $totalXp",
+                            color = AccentPrimary,
+                            fontFamily = Poppins,
+                            fontWeight = FontWeight.Normal,
+                            fontSize = 9.sp
+                        )
+                    }
                     Text(
                         text = "✕",
                         color = AccentPrimary,
@@ -208,7 +187,7 @@ fun MissionsExpandedOverlay(
 
                 Spacer(modifier = Modifier.height(4.dp))
 
-                // Separador
+                // Separador decorativo
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -224,15 +203,40 @@ fun MissionsExpandedOverlay(
                         )
                 )
 
-                Spacer(modifier = Modifier.height(12.dp))
+                Spacer(modifier = Modifier.height(4.dp))
 
-                // Lista de misiones
-                LazyColumn(
-                    verticalArrangement = Arrangement.spacedBy(12.dp),
-                    modifier = Modifier.fillMaxSize()
-                ) {
-                    items(missions, key = { it.id }) { mission ->
-                        MissionItem(mission = mission)
+                // Subtítulo: se renuevan mañana
+                Text(
+                    text = "Las misiones se renuevan cada día",
+                    color = CyberWhite.copy(alpha = 0.4f),
+                    fontFamily = Poppins,
+                    fontWeight = FontWeight.Normal,
+                    fontSize = 8.sp,
+                    letterSpacing = 0.5.sp
+                )
+
+                Spacer(modifier = Modifier.height(10.dp))
+
+                if (missions.isEmpty()) {
+                    Box(
+                        contentAlignment = Alignment.Center,
+                        modifier = Modifier.fillMaxSize()
+                    ) {
+                        Text(
+                            text = "Cargando misiones...",
+                            color = CyberWhite.copy(alpha = 0.5f),
+                            fontFamily = Poppins,
+                            fontSize = 12.sp
+                        )
+                    }
+                } else {
+                    LazyColumn(
+                        verticalArrangement = Arrangement.spacedBy(12.dp),
+                        modifier = Modifier.fillMaxSize()
+                    ) {
+                        items(missions, key = { it.missionId }) { mission ->
+                            MissionItem(mission = mission)
+                        }
                     }
                 }
             }
@@ -240,18 +244,21 @@ fun MissionsExpandedOverlay(
     }
 }
 
-// ─── Ítem de misión individual ────────────────────────────────────────────────
+// ─── MissionItem ──────────────────────────────────────────────────────────────
 @Composable
-private fun MissionItem(mission: Mission) {
-    val progressFraction = mission.progress / 100f
+private fun MissionItem(mission: DailyMissionEntity) {
+    val progressFraction =
+        if (mission.goal > 0) mission.currentProgress.toFloat() / mission.goal else 0f
+    val progressPercent = (progressFraction * 100).toInt()
+
     val statusColor = when {
         mission.isCompleted -> NeonGreen
-        mission.progress > 0 -> CyberAmber
+        mission.currentProgress > 0 -> CyberAmber
         else -> SurfaceLight
     }
     val statusLabel = when {
-        mission.isCompleted -> "COMPLETADA"
-        mission.progress > 0 -> "EN CURSO  ${mission.progress}%"
+        mission.isCompleted -> "✓ COMPLETADA"
+        mission.currentProgress > 0 -> "${mission.currentProgress}/${mission.goal}"
         else -> "PENDIENTE"
     }
 
@@ -264,7 +271,7 @@ private fun MissionItem(mission: Mission) {
             .padding(horizontal = 14.dp, vertical = 10.dp),
         verticalArrangement = Arrangement.spacedBy(6.dp)
     ) {
-        // Título y estado
+        // Fila superior: título + estado
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -287,6 +294,7 @@ private fun MissionItem(mission: Mission) {
                 letterSpacing = 0.5.sp
             )
         }
+
         // Descripción
         Text(
             text = mission.description,
@@ -296,15 +304,29 @@ private fun MissionItem(mission: Mission) {
             fontSize = 10.sp,
             lineHeight = 14.sp
         )
-        // Barra de progreso
-        LinearProgressIndicator(
-            progress = progressFraction,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(5.dp)
-                .clip(RoundedCornerShape(3.dp)),
-            color = statusColor,
-            trackColor = SurfaceColor
-        )
+
+        // Fila inferior: barra de progreso + recompensa XP
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            LinearProgressIndicator(
+                progress = progressFraction,
+                modifier = Modifier
+                    .weight(1f)
+                    .height(5.dp)
+                    .clip(RoundedCornerShape(3.dp)),
+                color = statusColor,
+                trackColor = SurfaceColor
+            )
+            Text(
+                text = "+${mission.xpReward} XP",
+                color = if (mission.isCompleted) NeonGreen else CyberYellow.copy(alpha = 0.7f),
+                fontFamily = Poppins,
+                fontWeight = FontWeight.Bold,
+                fontSize = 8.sp
+            )
+        }
     }
 }

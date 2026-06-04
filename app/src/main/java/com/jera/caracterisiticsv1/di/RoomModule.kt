@@ -2,6 +2,7 @@ package com.jera.caracterisiticsv1.di
 
 import com.jera.caracterisiticsv1.data.database.ModelDatabase
 import com.jera.caracterisiticsv1.data.database.dao.AchievementDao
+import com.jera.caracterisiticsv1.data.database.dao.DailyMissionDao
 import com.jera.caracterisiticsv1.data.database.dao.UserProfileDao
 import android.content.Context
 import androidx.room.Room
@@ -21,9 +22,14 @@ class RoomModule {
     @Singleton
     @Provides
     fun provideRoom(@ApplicationContext context: Context) =
-         Room.databaseBuilder(context, ModelDatabase::class.java, MODEL_DATABASE_NAME)
-             .fallbackToDestructiveMigration()
-             .build()
+        Room.databaseBuilder(context, ModelDatabase::class.java, MODEL_DATABASE_NAME)
+            .addMigrations(
+                ModelDatabase.MIGRATION_2_3,
+                ModelDatabase.MIGRATION_3_4,
+                ModelDatabase.MIGRATION_4_5
+            )
+            .fallbackToDestructiveMigration()
+            .build()
 
 
     @Singleton
@@ -40,4 +46,9 @@ class RoomModule {
     @Provides
     fun provideAchievementDao(database: ModelDatabase): AchievementDao =
         database.achievementDao()
+
+    @Singleton
+    @Provides
+    fun provideDailyMissionDao(database: ModelDatabase): DailyMissionDao =
+        database.dailyMissionDao()
 }

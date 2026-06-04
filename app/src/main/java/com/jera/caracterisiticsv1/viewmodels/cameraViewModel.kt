@@ -17,6 +17,7 @@ import com.jera.caracterisiticsv1.data.ApiResponse.Detection
 import com.jera.caracterisiticsv1.data.ApiResponse.CarImagesApiResponse.CarImagesApiResponse
 import com.jera.caracterisiticsv1.data.modelDetected.ModelDetected
 import com.jera.caracterisiticsv1.repository.CameraRepository
+import com.jera.caracterisiticsv1.repository.MissionRepository
 import com.jera.caracterisiticsv1.utilities.ResourceState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -50,6 +51,7 @@ class CameraViewModel @Inject constructor(
     private val locationRepository: LocationRepository,
     private val carSpecsRepository: CarSpecsRepository,
     private val userRepository: UserRepository,
+    private val missionRepository: MissionRepository,
     @ApplicationScope private val applicationScope: CoroutineScope
 ) : ViewModel() {
 
@@ -80,6 +82,10 @@ class CameraViewModel @Inject constructor(
 
     private val _xpGainedEvent = MutableStateFlow<Int?>(null)
     val xpGainedEvent: StateFlow<Int?> = _xpGainedEvent
+
+    // Misiones completadas tras la captura (título + XP)
+    private val _missionsCompletedEvent = MutableStateFlow<List<Pair<String, Int>>>(emptyList())
+    val missionsCompletedEvent: StateFlow<List<Pair<String, Int>>> = _missionsCompletedEvent
 
     val models: MutableList<ModelDetected> = mutableListOf()
 
@@ -399,7 +405,7 @@ class CameraViewModel @Inject constructor(
                             modelName = model.model_name.trim(),
                             year = year
                         )
-                        if (specs != null) {
+                if (specs != null) {
                             databaseRepository.updateModelSpecs(insertedId.toInt(), specs)
                             Log.d("CameraViewModel", "Specs guardadas para id=$insertedId")
                         } else {
@@ -409,11 +415,39 @@ class CameraViewModel @Inject constructor(
                         Log.e("CameraViewModel", "Error obteniendo specs", e)
                     }
                 }
+
+                // Evaluar misiones con la entidad más actualizada (specs incluidas si las hay)
+                val entityForMissions = databaseRepository.getModelById(insertedId.toInt())
+                if (entityForMissions != null) {
+                    evaluateMissions(entityForMissions)
+                }
             }
+        }
+    }
+
+    private suspend fun evaluateMissions(entity: com.jera.caracterisiticsv1.data.database.entities.ModelEntity) {
+        try {
+            val completed = missionRepository.onCarCaptured(entity)
+            if (completed.isNotEmpty()) {
+                // Otorgar XP por cada misión completada
+                var totalMissionXp = 0
+                completed.forEach { mission ->
+                    userRepository.addXpDirect(mission.xpReward)
+                    totalMissionXp += mission.xpReward
+                }
+                // Notificar a la UI (título + XP de cada misión)
+                _missionsCompletedEvent.value = completed.map { it.title to it.xpReward }
+                // Persistir en el repo (singleton) para que CaptureRewardScreen las lea
+                missionRepository.setPendingCompleted(completed)
+                Log.d("CameraViewModel", "Misiones completadas: ${completed.size}, XP total misiones: $totalMissionXp")
+            }
+        } catch (e: Exception) {
+            Log.e("CameraViewModel", "Error evaluando misiones", e)
         }
     }
 
     fun consumeLevelUpEvent() { _levelUpEvent.value = null }
     fun consumeXpGainedEvent() { _xpGainedEvent.value = null }
     fun consumeAchievementsEvent() { _newAchievements.value = emptyList() }
+    fun consumeMissionsCompletedEvent() { _missionsCompletedEvent.value = emptyList() }
 }

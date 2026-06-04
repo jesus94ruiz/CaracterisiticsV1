@@ -5,15 +5,17 @@ import androidx.room.RoomDatabase
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.jera.caracterisiticsv1.data.database.dao.AchievementDao
+import com.jera.caracterisiticsv1.data.database.dao.DailyMissionDao
 import com.jera.caracterisiticsv1.data.database.dao.ModelEntityDao
 import com.jera.caracterisiticsv1.data.database.dao.UserProfileDao
 import com.jera.caracterisiticsv1.data.database.entities.AchievementEntity
+import com.jera.caracterisiticsv1.data.database.entities.DailyMissionEntity
 import com.jera.caracterisiticsv1.data.database.entities.ModelEntity
 import com.jera.caracterisiticsv1.data.database.entities.UserProfileEntity
 
 @Database(
-    entities = [ModelEntity::class, UserProfileEntity::class, AchievementEntity::class],
-    version = 4,
+    entities = [ModelEntity::class, UserProfileEntity::class, AchievementEntity::class, DailyMissionEntity::class],
+    version = 5,
     exportSchema = false
 )
 abstract class ModelDatabase : RoomDatabase() {
@@ -21,6 +23,7 @@ abstract class ModelDatabase : RoomDatabase() {
     abstract fun modelDetectedDao(): ModelEntityDao
     abstract fun userProfileDao(): UserProfileDao
     abstract fun achievementDao(): AchievementDao
+    abstract fun dailyMissionDao(): DailyMissionDao
 
     companion object {
 
@@ -48,6 +51,29 @@ abstract class ModelDatabase : RoomDatabase() {
                 database.execSQL("ALTER TABLE modelsDetected_table ADD COLUMN specs_curb_weight_kg TEXT DEFAULT NULL")
                 database.execSQL("ALTER TABLE modelsDetected_table ADD COLUMN specs_gearbox TEXT DEFAULT NULL")
                 database.execSQL("ALTER TABLE modelsDetected_table ADD COLUMN specs_drive_wheels TEXT DEFAULT NULL")
+            }
+        }
+
+        /** Migración 4 → 5: añade tabla de misiones diarias */
+        val MIGRATION_4_5 = object : Migration(4, 5) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                database.execSQL(
+                    """
+                    CREATE TABLE IF NOT EXISTS daily_mission_table (
+                        mission_id TEXT NOT NULL PRIMARY KEY,
+                        type TEXT NOT NULL,
+                        title TEXT NOT NULL,
+                        description TEXT NOT NULL,
+                        target_brand TEXT DEFAULT NULL,
+                        target_value INTEGER NOT NULL DEFAULT 1,
+                        current_progress INTEGER NOT NULL DEFAULT 0,
+                        goal INTEGER NOT NULL DEFAULT 1,
+                        xp_reward INTEGER NOT NULL DEFAULT 50,
+                        date_key TEXT NOT NULL,
+                        is_completed INTEGER NOT NULL DEFAULT 0
+                    )
+                    """.trimIndent()
+                )
             }
         }
 

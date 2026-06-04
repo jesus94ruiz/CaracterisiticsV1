@@ -4,8 +4,10 @@ import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -19,8 +21,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.jera.caracterisiticsv1.navigation.AppScreens
+import com.jera.caracterisiticsv1.viewmodels.MissionsViewModel
 import kotlinx.coroutines.delay
 
 // Paleta CyberPunk (mirrors res/values/colors.xml)
@@ -41,8 +45,16 @@ fun CaptureRewardScreen(
     xpGained: Int,
     leveledUp: Boolean,
     newLevel: Int,
-    achievementsCount: Int
+    achievementsCount: Int,
+    missionsViewModel: MissionsViewModel = hiltViewModel()
 ) {
+    val completedMissions by missionsViewModel.pendingCompletedMissions.collectAsState()
+
+    // Limpiar missions pendientes al salir de la pantalla
+    DisposableEffect(Unit) {
+        onDispose { missionsViewModel.clearPendingCompleted() }
+    }
+
     var animatedXp  by remember { mutableStateOf(0) }
     var showContent by remember { mutableStateOf(false) }
     var showButton  by remember { mutableStateOf(false) }
@@ -129,7 +141,8 @@ fun CaptureRewardScreen(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 24.dp)
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 24.dp, vertical = 32.dp)
                 .alpha(contentAlpha),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(20.dp)
@@ -269,6 +282,17 @@ fun CaptureRewardScreen(
                                    else "Has completado $achievementsCount nuevos retos",
                         accentColor = CyberMagenta,
                         borderColor = CyberMagenta
+                    )
+                }
+
+                // Tarjetas de misiones diarias completadas
+                completedMissions.forEach { mission ->
+                    CyberRewardCard(
+                        emoji = "🎯",
+                        title = "MISIÓN COMPLETADA",
+                        subtitle = "${mission.title}  •  +${mission.xpReward} XP",
+                        accentColor = CyberGreen,
+                        borderColor = CyberGreen
                     )
                 }
 

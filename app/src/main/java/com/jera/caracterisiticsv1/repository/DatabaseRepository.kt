@@ -23,6 +23,11 @@ class DatabaseRepository @Inject constructor(private val modelEntityDao: ModelEn
         return modelEntityDao.insert(modelEntity)
     }
 
+    /** Devuelve una entidad por su id (con specs ya actualizadas si las hay) */
+    suspend fun getModelById(id: Int): ModelEntity? {
+        return modelEntityDao.getModelById(id)
+    }
+
     /** Actualiza los campos de specs de un coche ya guardado usando los datos de CarSpecsAPI */
     suspend fun updateModelSpecs(id: Int, specs: CarSpecsTrimDetail) {
         modelEntityDao.updateSpecs(

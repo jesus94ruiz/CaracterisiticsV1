@@ -35,9 +35,9 @@ import com.jera.caracterisiticsv1.ui.components.MissionsExpandedOverlay
 import com.jera.caracterisiticsv1.ui.components.UserInfo
 import com.jera.caracterisiticsv1.ui.components.UserInfoPanel
 import com.jera.caracterisiticsv1.ui.components.XpGainedToast
-import com.jera.caracterisiticsv1.ui.components.placeholderMissions
 import com.jera.caracterisiticsv1.ui.theme.*
 import com.jera.caracterisiticsv1.viewmodels.MapViewModel
+import com.jera.caracterisiticsv1.viewmodels.MissionsViewModel
 import com.jera.caracterisiticsv1.viewmodels.ProfileViewModel
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.LocationOn
@@ -47,13 +47,15 @@ import kotlinx.coroutines.launch
 fun MapScreen(
     navController: NavController,
     viewModel: MapViewModel = hiltViewModel(),
-    profileViewModel: ProfileViewModel = hiltViewModel()
+    profileViewModel: ProfileViewModel = hiltViewModel(),
+    missionsViewModel: MissionsViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val profileState by profileViewModel.uiState.collectAsState()
     val xpGainedEvent by profileViewModel.xpGainedEvent.collectAsState()
     val levelUpEvent by profileViewModel.levelUpEvent.collectAsState()
     val pendingAchievements by profileViewModel.pendingAchievements.collectAsState()
+    val missionsUiState by missionsViewModel.uiState.collectAsState()
 
     val userInfo = UserInfo(
         name = profileState.profile.username,
@@ -255,7 +257,7 @@ fun MapScreen(
 
         // ── Abajo izquierda: MissionsCompactCard ──────────────────────────────
         MissionsCompactCard(
-            missions = placeholderMissions,
+            missions = missionsUiState.missions,
             onExpand = { missionsExpanded = true },
             modifier = Modifier
                 .align(Alignment.BottomStart)
@@ -276,7 +278,7 @@ fun MapScreen(
         // ── Overlay expandido de misiones ─────────────────────────────────────
         if (missionsExpanded) {
             MissionsExpandedOverlay(
-                missions = placeholderMissions,
+                missions = missionsUiState.missions,
                 onDismiss = { missionsExpanded = false },
                 modifier = Modifier.fillMaxSize()
             )
