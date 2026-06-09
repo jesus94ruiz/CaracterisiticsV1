@@ -5,10 +5,14 @@ import com.jera.caracterisiticsv1.data.database.dao.UserProfileDao
 import com.jera.caracterisiticsv1.data.database.entities.AchievementEntity
 import com.jera.caracterisiticsv1.data.database.entities.UserProfileEntity
 import com.jera.caracterisiticsv1.utilities.XpManager
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -22,8 +26,13 @@ data class LevelUpResult(
 @Singleton
 class UserRepository @Inject constructor(
     private val userProfileDao: UserProfileDao,
-    private val achievementDao: AchievementDao
+    private val achievementDao: AchievementDao,
+    private val authRepository: AuthRepository,
+    private val firestoreRepository: FirestoreRepository
 ) {
+
+    // Scope independiente para operaciones de Firestore (no cancela con el ViewModel)
+    private val repoScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     // ── Canales de eventos (SharedFlow) ──────────────────────────────────────
     private val _xpGainedChannel = MutableSharedFlow<Int>(extraBufferCapacity = 8)
@@ -39,11 +48,17 @@ class UserRepository @Inject constructor(
     // ── Profile ───────────────────────────────────────────────────────────────
     fun getUserProfileFlow(): Flow<UserProfileEntity?> = userProfileDao.getUserProfile()
 
+    suspend fun getUserProfileOnce(): UserProfileEntity? = userProfileDao.getUserProfileOnce()
+
     suspend fun ensureProfileExists() {
         if (userProfileDao.getUserProfileOnce() == null) {
             userProfileDao.insertOrUpdateProfile(UserProfileEntity())
             achievementDao.insertAchievements(defaultAchievements())
         }
+    }
+
+    suspend fun updateUsername(username: String) {
+        userProfileDao.updateUsername(username)
     }
 
     // ── XP & Nivel ───────────────────────────────────────────────────────────
@@ -77,6 +92,23 @@ class UserRepository @Inject constructor(
             totalCaptures = newTotalCaptures
         )
 
+        // Sincronizar stats con Firestore en background (fire-and-forget)
+        val uid = authRepository.getCurrentUid()
+        if (uid != null) {
+            repoScope.launch {
+                runCatching {
+                    firestoreRepository.updateUserStats(
+                        uid = uid,
+                        level = newLevel,
+                        currentXp = currentXpInLevel,
+                        totalXp = newTotalXp,
+                        carsCollected = newCarsCollected,
+                        totalCaptures = newTotalCaptures
+                    )
+                }
+            }
+        }
+
         val newAchievements = checkAchievements(
             totalCaptures = newTotalCaptures,
             carsCollected = newCarsCollected,
@@ -94,7 +126,17 @@ class UserRepository @Inject constructor(
         // Emitir eventos para la UI
         _xpGainedChannel.tryEmit(xpGained)
         if (result.leveledUp) _levelUpChannel.tryEmit(newLevel)
-        if (newAchievements.isNotEmpty()) _achievementChannel.tryEmit(newAchievements)
+        if (newAchievements.isNotEmpty()) {
+            _achievementChannel.tryEmit(newAchievements)
+            // Sincronizar logros desbloqueados con Firestore
+            if (uid != null) {
+                repoScope.launch {
+                    newAchievements.forEach { ach ->
+                        runCatching { firestoreRepository.unlockAchievement(uid, ach) }
+                    }
+                }
+            }
+        }
 
         return result
     }

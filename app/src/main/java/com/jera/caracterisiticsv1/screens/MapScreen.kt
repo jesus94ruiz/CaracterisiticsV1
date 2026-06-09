@@ -39,6 +39,7 @@ import com.jera.caracterisiticsv1.ui.theme.*
 import com.jera.caracterisiticsv1.viewmodels.MapViewModel
 import com.jera.caracterisiticsv1.viewmodels.MissionsViewModel
 import com.jera.caracterisiticsv1.viewmodels.ProfileViewModel
+import com.jera.caracterisiticsv1.viewmodels.SocialMapViewModel
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.LocationOn
 import kotlinx.coroutines.launch
@@ -48,7 +49,8 @@ fun MapScreen(
     navController: NavController,
     viewModel: MapViewModel = hiltViewModel(),
     profileViewModel: ProfileViewModel = hiltViewModel(),
-    missionsViewModel: MissionsViewModel = hiltViewModel()
+    missionsViewModel: MissionsViewModel = hiltViewModel(),
+    socialMapViewModel: SocialMapViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val profileState by profileViewModel.uiState.collectAsState()
@@ -56,6 +58,7 @@ fun MapScreen(
     val levelUpEvent by profileViewModel.levelUpEvent.collectAsState()
     val pendingAchievements by profileViewModel.pendingAchievements.collectAsState()
     val missionsUiState by missionsViewModel.uiState.collectAsState()
+    val socialCars by socialMapViewModel.capturedCars.collectAsState()
 
     val userInfo = UserInfo(
         name = profileState.profile.username,
@@ -158,11 +161,21 @@ fun MapScreen(
                         bottom = 136.dp
                     )
                 ) {
+                    // Marcadores propios
                     viewModel.getCarsWithLocation().forEach { (location, car) ->
                         Marker(
                             state = MarkerState(position = location),
                             title = "${car.make_name} ${car.model_name}",
                             snippet = car.years
+                        )
+                    }
+                    // Marcadores sociales (coches de otros usuarios)
+                    socialCars.forEach { car ->
+                        val pos = com.google.android.gms.maps.model.LatLng(car.latitude, car.longitude)
+                        Marker(
+                            state = MarkerState(position = pos),
+                            title = "${car.makeName} ${car.modelName}",
+                            snippet = "@${car.username} · ${car.years}"
                         )
                     }
                 }
@@ -255,6 +268,28 @@ fun MapScreen(
                 .padding(end = 12.dp, top = 24.dp)
         )
 
+        // ── Debajo de UserInfoPanel: botón Amigos ─────────────────────────────
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .padding(end = 16.dp, top = 84.dp)
+                .clip(androidx.compose.foundation.shape.RoundedCornerShape(8.dp))
+                .background(CyberDark.copy(alpha = 0.88f))
+                .border(1.dp, AccentPrimary.copy(alpha = 0.55f), androidx.compose.foundation.shape.RoundedCornerShape(8.dp))
+                .clickable { navController.navigate(AppScreens.FriendsScreen.route) }
+                .padding(horizontal = 10.dp, vertical = 6.dp)
+        ) {
+            androidx.compose.material3.Text(
+                text = "👥 AMIGOS",
+                color = AccentPrimary,
+                fontFamily = Poppins,
+                fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
+                fontSize = 9.sp,
+                letterSpacing = 1.sp
+            )
+        }
+
         // ── Abajo izquierda: MissionsCompactCard ──────────────────────────────
         MissionsCompactCard(
             missions = missionsUiState.missions,
@@ -266,10 +301,11 @@ fun MapScreen(
 
         // ── Abajo derecha: FloatingNavHub ─────────────────────────────────────
         FloatingNavHub(
-            onCameraClick   = { navController.navigate(AppScreens.CameraScreen.route) },
-            onGarageClick   = { navController.navigate(AppScreens.GarageScreen.route) },
-            onGalleryClick  = { navController.navigate(AppScreens.GalleryScreen.route) },
-            onSettingsClick = { navController.navigate(AppScreens.SettingsScreen.route) },
+            onCameraClick      = { navController.navigate(AppScreens.CameraScreen.route) },
+            onGarageClick      = { navController.navigate(AppScreens.GarageScreen.route) },
+            onGalleryClick     = { navController.navigate(AppScreens.GalleryScreen.route) },
+            onSettingsClick    = { navController.navigate(AppScreens.SettingsScreen.route) },
+            onLeaderboardClick = { navController.navigate(AppScreens.LeaderboardScreen.route) },
             modifier = Modifier
                 .align(Alignment.BottomEnd)
                 .padding(end = 16.dp, bottom = 24.dp)

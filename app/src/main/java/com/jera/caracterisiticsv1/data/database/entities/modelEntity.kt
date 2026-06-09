@@ -14,6 +14,7 @@ data class ModelEntity(
     @ColumnInfo(name = "years") val years: String,
     @ColumnInfo(name = "probability") val probability: Double,
     val path: String,
+    @ColumnInfo(name = "image_url") val imageUrl: String? = null,
     @ColumnInfo(name = "latitude") val latitude: Double? = null,
     @ColumnInfo(name = "longitude") val longitude: Double? = null,
     @ColumnInfo(name = "captureTimestamp") val captureTimestamp: Long? = null,

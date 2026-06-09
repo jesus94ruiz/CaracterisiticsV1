@@ -41,11 +41,20 @@ fun FloatingNavHub(
     onGalleryClick: () -> Unit,
     onGarageClick: () -> Unit,
     onSettingsClick: () -> Unit,
+    onLeaderboardClick: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     Box(
         modifier = modifier.size(200.dp)
     ) {
+        // ── Ranking: diagonal arriba-centro (nuevo) ───────────────────────
+        SatelliteButton(
+            iconRes = R.drawable.casco,
+            label = "Ranking",
+            onClick = onLeaderboardClick,
+            modifier = Modifier.absoluteOffset(x = 115.dp, y = 44.dp)
+        )
+
         // ── Garaje: directamente encima del principal ─────────────────────
         // Centro del satélite en (164, 84) → Column offset (142, 62)
         SatelliteButton(

@@ -29,4 +29,7 @@ interface UserProfileDao {
         carsCollected: Int,
         totalCaptures: Int
     )
+
+    @Query("UPDATE user_profile_table SET username = :username WHERE userId = 1")
+    suspend fun updateUsername(username: String)
 }

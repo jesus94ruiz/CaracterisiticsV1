@@ -16,9 +16,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.jera.caracterisiticsv1.navigation.AppScreens
 import com.jera.caracterisiticsv1.ui.theme.*
+import com.jera.caracterisiticsv1.viewmodels.AuthViewModel
 import kotlinx.coroutines.delay
 
 // ─── SplashScreen Cyberpunk ──────────────────────────────────────────────────
@@ -30,11 +32,22 @@ import kotlinx.coroutines.delay
 // ────────────────────────────────────────────────────────────────────────────
 
 @Composable
-fun SplashScreen(navController: NavHostController) {
+fun SplashScreen(
+    navController: NavHostController,
+    authViewModel: AuthViewModel = hiltViewModel()
+) {
+    val authState by authViewModel.uiState.collectAsState()
+
     LaunchedEffect(key1 = true) {
         delay(2800)
         navController.popBackStack()
-        navController.navigate(AppScreens.MapScreen.route)
+        // Si ya está logueado → ir al mapa directamente
+        // Si no → mostrar login
+        if (authState.isLoggedIn) {
+            navController.navigate(AppScreens.MapScreen.route)
+        } else {
+            navController.navigate(AppScreens.LoginScreen.route)
+        }
     }
     Splash()
 }

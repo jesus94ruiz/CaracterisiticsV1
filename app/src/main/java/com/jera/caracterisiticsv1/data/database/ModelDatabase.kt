@@ -15,7 +15,7 @@ import com.jera.caracterisiticsv1.data.database.entities.UserProfileEntity
 
 @Database(
     entities = [ModelEntity::class, UserProfileEntity::class, AchievementEntity::class, DailyMissionEntity::class],
-    version = 5,
+    version = 6,
     exportSchema = false
 )
 abstract class ModelDatabase : RoomDatabase() {
@@ -26,6 +26,14 @@ abstract class ModelDatabase : RoomDatabase() {
     abstract fun dailyMissionDao(): DailyMissionDao
 
     companion object {
+
+        /** Migración 5 → 6: añade columna image_url a coches */
+        val MIGRATION_5_6 = object : Migration(5, 6) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                database.execSQL("ALTER TABLE modelsDetected_table ADD COLUMN image_url TEXT DEFAULT NULL")
+            }
+        }
+
 
         /** Migración 2 → 3: añade columnas CarSpecs */
         val MIGRATION_2_3 = object : Migration(2, 3) {

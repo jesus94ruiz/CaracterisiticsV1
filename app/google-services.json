@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "410714250313",
+    "project_id": "caracteristics-425918",
+    "storage_bucket": "caracteristics-425918.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:410714250313:android:5d505c6aacd8d7bd33f398",
+        "android_client_info": {
+          "package_name": "com.jera.caracterisiticsv1"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "410714250313-7jdqiacbmn7c6d7j5fb9bhng8taj7kji.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.jera.caracterisiticsv1",
+            "certificate_hash": "b39a5b6a9309e2301906e421f24ffc7892fc1775"
+          }
+        },
+        {
+          "client_id": "410714250313-ae4nl1q987gq9gldc6js7vmahneglugv.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAVeVES8P78qN1YjdpDYTyrUtWjAbDcPqQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "410714250313-ae4nl1q987gq9gldc6js7vmahneglugv.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

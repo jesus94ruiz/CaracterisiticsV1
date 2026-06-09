@@ -26,7 +26,8 @@ class RoomModule {
             .addMigrations(
                 ModelDatabase.MIGRATION_2_3,
                 ModelDatabase.MIGRATION_3_4,
-                ModelDatabase.MIGRATION_4_5
+                ModelDatabase.MIGRATION_4_5,
+                ModelDatabase.MIGRATION_5_6
             )
             .fallbackToDestructiveMigration()
             .build()

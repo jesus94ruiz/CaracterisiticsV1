@@ -20,6 +20,9 @@ fun AppNavigation(){
         composable(AppScreens.SplashScreen.route) {
             SplashScreen(navController)
         }
+        composable(AppScreens.LoginScreen.route) {
+            LoginScreen(navController)
+        }
         composable(AppScreens.MainScreen.route){
             MainScreen(navController)
         }
@@ -43,6 +46,15 @@ fun AppNavigation(){
         }
         composable(AppScreens.ProfileScreen.route){
             ProfileScreen(navController)
+        }
+        composable(AppScreens.LeaderboardScreen.route){
+            LeaderboardScreen(navController)
+        }
+        composable(AppScreens.ShowcaseScreen.route){
+            ShowcaseScreen(navController)
+        }
+        composable(AppScreens.FriendsScreen.route){
+            FriendsScreen(navController)
         }
         composable(
             route = AppScreens.CaptureRewardScreen.route,

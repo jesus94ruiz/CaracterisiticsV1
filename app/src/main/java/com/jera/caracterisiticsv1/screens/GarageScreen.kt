@@ -93,7 +93,8 @@ fun GarageScreen(
             Column(modifier = Modifier.fillMaxSize()) {
                 GarageHeader(
                     title    = "// GARAGE",
-                    subtitle = "${allModels.size} UNIDADES  ·  ${brands.size} MARCAS"
+                    subtitle = "${allModels.size} UNIDADES  ·  ${brands.size} MARCAS",
+                    onShowcaseClick = { navController.navigate(com.jera.caracterisiticsv1.navigation.AppScreens.ShowcaseScreen.route) }
                 )
                 ViewToggleBar(current = viewMode, onChange = { viewMode = it })
                 Crossfade(
@@ -434,10 +435,33 @@ private fun CarsLevel(
 }
 
 @Composable
-private fun GarageHeader(title: String, subtitle: String) {
-    Column(modifier = Modifier.fillMaxWidth().background(SurfaceColor).padding(horizontal = 16.dp, vertical = 14.dp)) {
-        Text(title, fontFamily = Poppins, fontWeight = FontWeight.Bold, fontSize = 22.sp, color = AccentPrimary, letterSpacing = 2.sp)
-        Text(subtitle, fontFamily = Poppins, fontSize = 11.sp, color = TextSecondary, letterSpacing = 0.5.sp)
+private fun GarageHeader(title: String, subtitle: String, onShowcaseClick: () -> Unit) {
+    Row(
+        modifier = Modifier.fillMaxWidth().background(SurfaceColor).padding(horizontal = 16.dp, vertical = 14.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Column(modifier = Modifier.weight(1f)) {
+            Text(title, fontFamily = Poppins, fontWeight = FontWeight.Bold, fontSize = 22.sp, color = AccentPrimary, letterSpacing = 2.sp)
+            Text(subtitle, fontFamily = Poppins, fontSize = 11.sp, color = TextSecondary, letterSpacing = 0.5.sp)
+        }
+        // Botón Expositor
+        Box(
+            modifier = Modifier
+                .clip(RoundedCornerShape(8.dp))
+                .background(CyberYellow.copy(alpha = 0.15f))
+                .border(1.dp, CyberYellow.copy(alpha = 0.6f), RoundedCornerShape(8.dp))
+                .clickable { onShowcaseClick() }
+                .padding(horizontal = 10.dp, vertical = 6.dp)
+        ) {
+            Text(
+                text = "⭐ EXPOSITOR",
+                fontFamily = Poppins,
+                fontWeight = FontWeight.Bold,
+                fontSize = 10.sp,
+                color = CyberYellow,
+                letterSpacing = 0.5.sp
+            )
+        }
     }
 }
 

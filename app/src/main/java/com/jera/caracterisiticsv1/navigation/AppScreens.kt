@@ -2,6 +2,7 @@ package com.jera.caracterisiticsv1.navigation
 
 sealed class AppScreens(val route:String) {
     object SplashScreen: AppScreens("splash_screen")
+    object LoginScreen: AppScreens("login_screen")
     object MainScreen: AppScreens("main_screen")
     object CameraScreen: AppScreens("camera_screen")
     object SettingsScreen: AppScreens("settings_screen")
@@ -10,6 +11,9 @@ sealed class AppScreens(val route:String) {
     object GarageScreen: AppScreens("garage_screen")
     object MapScreen: AppScreens("map_screen")
     object ProfileScreen: AppScreens("profile_screen")
+    object LeaderboardScreen: AppScreens("leaderboard_screen")
+    object ShowcaseScreen: AppScreens("showcase_screen")
+    object FriendsScreen: AppScreens("friends_screen")
     object CaptureRewardScreen: AppScreens("capture_reward/{xpGained}/{leveledUp}/{newLevel}/{achievementsCount}") {
         fun createRoute(xpGained: Int, leveledUp: Boolean, newLevel: Int, achievementsCount: Int) =
             "capture_reward/$xpGained/$leveledUp/$newLevel/$achievementsCount"

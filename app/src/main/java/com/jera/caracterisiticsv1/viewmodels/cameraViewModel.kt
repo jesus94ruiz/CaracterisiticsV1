@@ -10,6 +10,7 @@ import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCaptureException
 import androidx.camera.view.LifecycleCameraController
 import androidx.core.content.ContextCompat
+import dagger.hilt.android.qualifiers.ApplicationContext
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.jera.caracterisiticsv1.data.ApiResponse.ApiResponse
@@ -46,6 +47,7 @@ import kotlinx.coroutines.CoroutineScope
 
 @HiltViewModel
 class CameraViewModel @Inject constructor(
+    @ApplicationContext private val appContext: Context,
     private val cameraRepository: CameraRepository,
     private val databaseRepository: DatabaseRepository,
     private val locationRepository: LocationRepository,
@@ -138,7 +140,9 @@ class CameraViewModel @Inject constructor(
             currentLongitude = location?.longitude
             currentTimestamp = System.currentTimeMillis()
 
-            val file = File.createTempFile("imagentest", ".jpg")
+            // Guardar en filesDir (permanente) en vez de createTempFile (temporal/borrable)
+            val picturesDir = File(appContext.filesDir, "captured_cars").also { it.mkdirs() }
+            val file = File(picturesDir, "capture_${System.currentTimeMillis()}.jpg")
             val outputDirectory = ImageCapture.OutputFileOptions.Builder(file).build()
 
             cameraController.takePicture(
