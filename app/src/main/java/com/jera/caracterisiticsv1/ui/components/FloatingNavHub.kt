@@ -16,24 +16,38 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.jera.caracterisiticsv1.R
 import com.jera.caracterisiticsv1.ui.theme.*
 
 // ─── FloatingNavHub ───────────────────────────────────────────────────────────
-// Botón principal (cámara) en la esquina inferior-derecha del hub.
-// Satélites posicionados alrededor del principal:
-//   • Garaje   → directamente encima
-//   • Galería  → diagonal arriba-izquierda
-//   • Ajustes  → a la izquierda
 //
-// Hub box: 200×200 dp
-// Main button center: (164, 164) — offset absoluteOffset(128, 128) para un botón de 72dp
-// Órbita: ~80 dp de distancia entre centros
+// Botón principal (cámara) en la esquina inferior-derecha del hub.
+// 4 satélites distribuidos uniformemente en el cuadrante superior-izquierdo,
+// dividiendo el arco 90-180 grados en 3 intervalos de 30 grados.
+//
+// Calculo (rev. 4 — radio restaurado a 105dp):
+//   Box: 220x220 dp
+//   Camara: 82 dp en offset(138,138) -> centro = (179, 179)
+//   Radio orbita: 105 dp  |  Satelite: 38 dp (radio=19)
+//   Separacion centros adyacentes: 2*105*sin(15) = 54 dp > 38 dp -> sin superposicion
+//   offset = (cx + r*cos(th) - 19,  cy - r*sin(th) - 19)
+//
+//   90  (arriba):       offset = (160, 55)  -> Garaje
+//   120 (diag.vert.):   offset = (108, 69)  -> Ranking
+//   150 (diag.horiz.):  offset = ( 69, 108) -> Galeria
+//   180 (izquierda):    offset = ( 55, 160) -> Ajustes
+//
 // ─────────────────────────────────────────────────────────────────────────────
+
+private val hubGradient = Brush.linearGradient(
+    colors = listOf(
+        CyberOrange.copy(alpha = 0.82f),
+        CyberOrangeDark.copy(alpha = 0.82f),
+        CyberPurple.copy(alpha = 0.82f)
+    )
+)
 
 @Composable
 fun FloatingNavHub(
@@ -45,53 +59,48 @@ fun FloatingNavHub(
     modifier: Modifier = Modifier
 ) {
     Box(
-        modifier = modifier.size(200.dp)
+        modifier = modifier.size(220.dp)
     ) {
-        // ── Ranking: diagonal arriba-centro (nuevo) ───────────────────────
-        SatelliteButton(
-            iconRes = R.drawable.casco,
-            label = "Ranking",
-            onClick = onLeaderboardClick,
-            modifier = Modifier.absoluteOffset(x = 115.dp, y = 44.dp)
-        )
-
-        // ── Garaje: directamente encima del principal ─────────────────────
-        // Centro del satélite en (164, 84) → Column offset (142, 62)
+        // 90 deg -> Garaje: directamente encima
         SatelliteButton(
             iconRes = R.drawable.car_in_garage,
             label = "Garaje",
             onClick = onGarageClick,
-            modifier = Modifier.absoluteOffset(x = 142.dp, y = 62.dp)
+            modifier = Modifier.absoluteOffset(x = 160.dp, y = 55.dp)
         )
 
-        // ── Galería: diagonal arriba-izquierda (ligeramente más arriba y a la derecha)
-        // Centro del satélite en (118, 94) → Column offset (96, 72)
+        // 120 deg -> Ranking: diagonal superior vertical
+        SatelliteButton(
+            iconRes = R.drawable.casco,
+            label = "Ranking",
+            onClick = onLeaderboardClick,
+            modifier = Modifier.absoluteOffset(x = 108.dp, y = 69.dp)
+        )
+
+        // 150 deg -> Galeria: diagonal superior horizontal
         SatelliteButton(
             iconRes = R.drawable.gallery,
-            label = "Galería",
+            label = "Galeria",
             onClick = onGalleryClick,
-            modifier = Modifier.absoluteOffset(x = 88.dp, y = 80.dp)
+            modifier = Modifier.absoluteOffset(x = 69.dp, y = 108.dp)
         )
 
-        // ── Ajustes: a la izquierda del principal ─────────────────────────
-        // Centro del satélite en (84, 164) → Column offset (62, 142)
+        // 180 deg -> Ajustes: directamente a la izquierda
         SatelliteButton(
             iconRes = R.drawable.settings,
             label = "Ajustes",
             onClick = onSettingsClick,
-            modifier = Modifier.absoluteOffset(x = 62.dp, y = 142.dp)
+            modifier = Modifier.absoluteOffset(x = 55.dp, y = 160.dp)
         )
 
-        // ── Botón principal: Cámara (abajo-derecha) ───────────────────────
-        // Offset (128, 128) → botón de 72dp ocupa (128..200, 128..200)
+        // Boton principal Camara — esquina inferior-derecha (138+82=220)
         MainCameraButton(
             onClick = onCameraClick,
-            modifier = Modifier.absoluteOffset(x = 128.dp, y = 128.dp)
+            modifier = Modifier.absoluteOffset(x = 138.dp, y = 138.dp)
         )
     }
 }
 
-// ─── Botón principal de cámara ────────────────────────────────────────────────
 @Composable
 private fun MainCameraButton(
     onClick: () -> Unit,
@@ -100,27 +109,30 @@ private fun MainCameraButton(
     Box(
         contentAlignment = Alignment.Center,
         modifier = modifier
-            .size(72.dp)
+            .size(82.dp)
             .shadow(elevation = 12.dp, shape = CircleShape)
             .clip(CircleShape)
             .background(
                 brush = Brush.radialGradient(
-                    colors = listOf(CyberOrange, CyberOrangeDark, CyberPurple)
+                    colors = listOf(
+                        CyberOrange.copy(alpha = 0.90f),
+                        CyberOrangeDark.copy(alpha = 0.90f),
+                        CyberPurple.copy(alpha = 0.90f)
+                    )
                 )
             )
-            .border(2.dp, CyberYellow, CircleShape)
+            .border(2.dp, CyberWhite.copy(alpha = 0.5f), CircleShape)
             .clickable { onClick() }
     ) {
         Image(
             painter = painterResource(id = R.drawable.camera),
-            contentDescription = "Cámara",
-            modifier = Modifier.size(32.dp),
+            contentDescription = "Camara",
+            modifier = Modifier.size(36.dp),
             colorFilter = ColorFilter.tint(CyberWhite)
         )
     }
 }
 
-// ─── Botón satélite pequeño ───────────────────────────────────────────────────
 @Composable
 private fun SatelliteButton(
     iconRes: Int,
@@ -135,24 +147,24 @@ private fun SatelliteButton(
         Box(
             contentAlignment = Alignment.Center,
             modifier = Modifier
-                .size(44.dp)
+                .size(38.dp)
                 .shadow(elevation = 8.dp, shape = CircleShape)
                 .clip(CircleShape)
-                .background(SurfaceColor)
-                .border(1.5.dp, AccentPrimary.copy(alpha = 0.8f), CircleShape)
+                .background(hubGradient)
+                .border(1.5.dp, CyberWhite.copy(alpha = 0.35f), CircleShape)
                 .clickable { onClick() }
         ) {
             Image(
                 painter = painterResource(id = iconRes),
                 contentDescription = label,
-                modifier = Modifier.size(20.dp),
-                colorFilter = ColorFilter.tint(CyberYellow)
+                modifier = Modifier.size(17.dp),
+                colorFilter = ColorFilter.tint(CyberWhite)
             )
         }
         Spacer(modifier = Modifier.height(2.dp))
         Text(
             text = label.uppercase(),
-            color = CyberYellow.copy(alpha = 0.85f),
+            color = CyberWhite.copy(alpha = 0.9f),
             fontFamily = Poppins,
             fontWeight = FontWeight.Bold,
             fontSize = 7.sp,

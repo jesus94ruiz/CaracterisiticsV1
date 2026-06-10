@@ -27,7 +27,6 @@ data class UserInfo(
     val avatarInitials: String = name.take(2).uppercase()
 )
 
-// Placeholder por defecto
 val placeholderUser = UserInfo(
     name = "JesusDrv",
     level = 12,
@@ -35,13 +34,15 @@ val placeholderUser = UserInfo(
     maxXp = 5000
 )
 
+private val hudGradient = Brush.linearGradient(
+    colors = listOf(
+        CyberOrange.copy(alpha = 0.82f),
+        CyberOrangeDark.copy(alpha = 0.82f),
+        CyberPurple.copy(alpha = 0.82f)
+    )
+)
+
 // ─── UserInfoPanel ────────────────────────────────────────────────────────────
-// Rectángulo superior-derecha con:
-//   • Avatar circular con iniciales (placeholder, fácil de sustituir por imagen)
-//   • Nombre de usuario
-//   • Nivel (LVL XX)
-//   • Barra de XP
-// ─────────────────────────────────────────────────────────────────────────────
 @Composable
 fun UserInfoPanel(
     user: UserInfo = placeholderUser,
@@ -55,12 +56,8 @@ fun UserInfoPanel(
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         modifier = modifier
             .clip(RoundedCornerShape(8.dp))
-            .background(CyberDark.copy(alpha = 0.88f))
-            .border(
-                1.dp,
-                AccentPrimary.copy(alpha = 0.55f),
-                RoundedCornerShape(8.dp)
-            )
+            .background(hudGradient)
+            .border(1.dp, CyberWhite.copy(alpha = 0.25f), RoundedCornerShape(8.dp))
             .then(if (onClick != null) Modifier.clickable { onClick() } else Modifier)
             .padding(horizontal = 10.dp, vertical = 8.dp)
     ) {
@@ -70,12 +67,8 @@ fun UserInfoPanel(
             modifier = Modifier
                 .size(38.dp)
                 .clip(CircleShape)
-                .background(
-                    brush = Brush.radialGradient(
-                        colors = listOf(CyberOrange, CyberPurple)
-                    )
-                )
-                .border(1.5.dp, CyberYellow, CircleShape)
+                .background(CyberWhite.copy(alpha = 0.20f))
+                .border(1.5.dp, CyberWhite.copy(alpha = 0.6f), CircleShape)
         ) {
             Text(
                 text = user.avatarInitials,
@@ -91,7 +84,6 @@ fun UserInfoPanel(
             verticalArrangement = Arrangement.spacedBy(3.dp),
             modifier = Modifier.widthIn(min = 90.dp, max = 130.dp)
         ) {
-            // Nombre + nivel en la misma fila
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -107,7 +99,7 @@ fun UserInfoPanel(
                 )
                 Text(
                     text = "LVL ${user.level}",
-                    color = CyberYellow,
+                    color = CyberWhite,
                     fontFamily = Poppins,
                     fontWeight = FontWeight.Bold,
                     fontSize = 9.sp,
@@ -122,14 +114,14 @@ fun UserInfoPanel(
                     .fillMaxWidth()
                     .height(5.dp)
                     .clip(RoundedCornerShape(3.dp)),
-                color = CyberAmber,
-                trackColor = SurfaceVariant
+                color = CyberWhite,
+                trackColor = CyberWhite.copy(alpha = 0.25f)
             )
 
             // XP numérico
             Text(
                 text = "${user.currentXp} / ${user.maxXp} XP",
-                color = NeonAmber.copy(alpha = 0.75f),
+                color = CyberWhite.copy(alpha = 0.80f),
                 fontFamily = Poppins,
                 fontWeight = FontWeight.Normal,
                 fontSize = 7.sp,

@@ -21,6 +21,14 @@ import androidx.compose.ui.unit.sp
 import com.jera.caracterisiticsv1.data.database.entities.DailyMissionEntity
 import com.jera.caracterisiticsv1.ui.theme.*
 
+private val hudGradient = Brush.linearGradient(
+    colors = listOf(
+        CyberOrange.copy(alpha = 0.82f),
+        CyberOrangeDark.copy(alpha = 0.82f),
+        CyberPurple.copy(alpha = 0.82f)
+    )
+)
+
 // ─── MissionsCompactCard ──────────────────────────────────────────────────────
 // Tarjeta compacta que aparece en la esquina del mapa
 @Composable
@@ -36,12 +44,8 @@ fun MissionsCompactCard(
         modifier = modifier
             .width(130.dp)
             .clip(RoundedCornerShape(8.dp))
-            .background(CyberDark.copy(alpha = 0.88f))
-            .border(
-                1.dp,
-                AccentPrimary.copy(alpha = 0.55f),
-                RoundedCornerShape(8.dp)
-            )
+            .background(hudGradient)
+            .border(1.dp, CyberWhite.copy(alpha = 0.25f), RoundedCornerShape(8.dp))
             .clickable { onExpand() }
             .padding(horizontal = 12.dp, vertical = 10.dp)
     ) {
@@ -54,7 +58,7 @@ fun MissionsCompactCard(
             ) {
                 Text(
                     text = "MISIONES",
-                    color = CyberYellow,
+                    color = CyberWhite,
                     fontFamily = Poppins,
                     fontWeight = FontWeight.Bold,
                     fontSize = 9.sp,
@@ -62,7 +66,7 @@ fun MissionsCompactCard(
                 )
                 Text(
                     text = "$completed/$total",
-                    color = AccentPrimary,
+                    color = CyberWhite,
                     fontFamily = Poppins,
                     fontWeight = FontWeight.Bold,
                     fontSize = 9.sp
@@ -75,14 +79,14 @@ fun MissionsCompactCard(
                     .fillMaxWidth()
                     .height(4.dp)
                     .clip(RoundedCornerShape(2.dp)),
-                color = CyberYellow,
-                trackColor = SurfaceVariant
+                color = CyberWhite,
+                trackColor = CyberWhite.copy(alpha = 0.25f)
             )
             // Próxima misión activa
             missions.firstOrNull { !it.isCompleted }?.let { next ->
                 Text(
                     text = next.title,
-                    color = CyberWhite.copy(alpha = 0.75f),
+                    color = CyberWhite.copy(alpha = 0.85f),
                     fontFamily = Poppins,
                     fontWeight = FontWeight.Normal,
                     fontSize = 8.sp,
@@ -93,7 +97,7 @@ fun MissionsCompactCard(
                 if (total > 0) {
                     Text(
                         text = "¡Todo completado!",
-                        color = NeonGreen,
+                        color = CyberWhite,
                         fontFamily = Poppins,
                         fontWeight = FontWeight.Bold,
                         fontSize = 8.sp
@@ -103,7 +107,7 @@ fun MissionsCompactCard(
             // Hint de expansión
             Text(
                 text = "▲ VER TODO",
-                color = AccentPrimary.copy(alpha = 0.7f),
+                color = CyberWhite.copy(alpha = 0.85f),
                 fontFamily = Poppins,
                 fontWeight = FontWeight.Bold,
                 fontSize = 7.sp,

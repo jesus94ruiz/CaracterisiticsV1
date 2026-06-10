@@ -9,6 +9,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -212,17 +213,21 @@ fun MapScreen(
                 .align(Alignment.TopStart)
                 .padding(start = 12.dp, top = 24.dp)
                 .clip(RoundedCornerShape(6.dp))
-                .background(CyberDark.copy(alpha = 0.85f))
-                .border(
-                    1.dp,
-                    AccentPrimary.copy(alpha = 0.55f),
-                    RoundedCornerShape(6.dp)
+                .background(
+                    Brush.linearGradient(
+                        colors = listOf(
+                            CyberOrange.copy(alpha = 0.82f),
+                            CyberOrangeDark.copy(alpha = 0.82f),
+                            CyberPurple.copy(alpha = 0.82f)
+                        )
+                    )
                 )
+                .border(1.dp, CyberWhite.copy(alpha = 0.25f), RoundedCornerShape(6.dp))
                 .padding(horizontal = 12.dp, vertical = 8.dp)
         ) {
             Text(
                 text = "// MINI MAP",
-                color = CyberYellow,
+                color = CyberWhite,
                 fontFamily = Poppins,
                 fontWeight = FontWeight.Bold,
                 fontSize = 10.sp,
@@ -235,12 +240,20 @@ fun MapScreen(
             contentAlignment = Alignment.Center,
             modifier = Modifier
                 .align(Alignment.TopStart)
-                .padding(start = 16.dp, top = 84.dp)    // justo debajo del MINI MAP (~24+36+24)
+                .padding(start = 16.dp, top = 84.dp)
                 .size(36.dp)
                 .shadow(elevation = 6.dp, shape = CircleShape)
                 .clip(CircleShape)
-                .background(CyberDark.copy(alpha = 0.90f))
-                .border(1.dp, AccentPrimary.copy(alpha = 0.7f), CircleShape)
+                .background(
+                    Brush.radialGradient(
+                        colors = listOf(
+                            CyberOrange.copy(alpha = 0.82f),
+                            CyberOrangeDark.copy(alpha = 0.82f),
+                            CyberPurple.copy(alpha = 0.82f)
+                        )
+                    )
+                )
+                .border(1.dp, CyberWhite.copy(alpha = 0.3f), CircleShape)
                 .clickable {
                     uiState.currentLocation?.let { loc ->
                         coroutineScope.launch {
@@ -254,7 +267,7 @@ fun MapScreen(
             Icon(
                 imageVector = Icons.Filled.LocationOn,
                 contentDescription = "Centrar mapa",
-                tint = CyberYellow,
+                tint = CyberWhite,
                 modifier = Modifier.size(18.dp)
             )
         }
@@ -273,16 +286,24 @@ fun MapScreen(
             contentAlignment = Alignment.Center,
             modifier = Modifier
                 .align(Alignment.TopEnd)
-                .padding(end = 16.dp, top = 84.dp)
-                .clip(androidx.compose.foundation.shape.RoundedCornerShape(8.dp))
-                .background(CyberDark.copy(alpha = 0.88f))
-                .border(1.dp, AccentPrimary.copy(alpha = 0.55f), androidx.compose.foundation.shape.RoundedCornerShape(8.dp))
+                .padding(end = 16.dp, top = 100.dp)
+                .clip(RoundedCornerShape(8.dp))
+                .background(
+                    Brush.linearGradient(
+                        colors = listOf(
+                            CyberOrange.copy(alpha = 0.82f),
+                            CyberOrangeDark.copy(alpha = 0.82f),
+                            CyberPurple.copy(alpha = 0.82f)
+                        )
+                    )
+                )
+                .border(1.dp, CyberWhite.copy(alpha = 0.25f), RoundedCornerShape(8.dp))
                 .clickable { navController.navigate(AppScreens.FriendsScreen.route) }
                 .padding(horizontal = 10.dp, vertical = 6.dp)
         ) {
             androidx.compose.material3.Text(
                 text = "👥 AMIGOS",
-                color = AccentPrimary,
+                color = CyberWhite,
                 fontFamily = Poppins,
                 fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
                 fontSize = 9.sp,
