@@ -117,7 +117,7 @@ fun LoginScreen(
                 verticalArrangement = Arrangement.spacedBy(6.dp)
             ) {
                 Text(
-                    text = "CARSCANNER",
+                    text = "Caracteristics",
                     fontFamily = Poppins,
                     fontWeight = FontWeight.Bold,
                     fontSize = 30.sp,
